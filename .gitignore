@@ -30,9 +30,11 @@ staticfiles/
 frontend/node_modules/
 frontend/dist/
 frontend/.env
+backend/.env
 
 # Environment
 .env
+.env.example
 .env.local
 .env.production
 
