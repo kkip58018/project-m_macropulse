@@ -30,6 +30,10 @@ from .views.admin import (
     RefreshCOTView,
     RefreshRetailSentimentView,
 )
+from django.http import JsonResponse
+
+def health_check(request):
+    return JsonResponse({"status": "ok"})
 
 urlpatterns = [
     # Auth
@@ -50,6 +54,7 @@ urlpatterns = [
     path('analysis/put-call/', PutCallRatioView.as_view(), name='put_call'),
     path('analysis/economic-heatmap/', EconomicHeatmapView.as_view(), name='economic_heatmap'),
     path('analysis/economic-calendar/', EconomicCalendarView.as_view(), name='economic_calendar'),
+    path('health/', health_check, name='health'),
 ]
 
 urlpatterns += [
