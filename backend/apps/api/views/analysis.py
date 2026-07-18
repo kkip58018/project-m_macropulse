@@ -40,23 +40,10 @@ class TopSetupsView(APIView):
     permission_classes = [IsAuthenticated]
 
     def get(self, request):
-        pairs = analyzer.get_enriched_pairs(include_currencies=True)
-        # Convert to list of dicts for serializer
-        data = []
-        for base, quote, bias, overall, fund, cot, retail, trend, season in pairs:
-            data.append({
-                'base': base,
-                'quote': quote,
-                'bias': bias,
-                'overall': overall,
-                'fund': fund,
-                'cot': cot,
-                'retail': retail,
-                'trend': trend,
-                'season': season,
-            })
-        serializer = TopSetupsSerializer(data, many=True)
-        return Response(serializer.data) 
+        enriched = analyzer.get_enriched_pairs(include_currencies=True)
+        serializer = TopSetupsSerializer(enriched, many=True)
+        return Response(serializer.data)
+    
 @method_decorator(cache_page(CACHE_1HOUR), name='dispatch')
 class AssetScorecardView(APIView):
     permission_classes = [IsAuthenticated]

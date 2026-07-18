@@ -9,7 +9,7 @@ class TopSetupsSerializer(serializers.Serializer):
     cot = serializers.IntegerField()
     retail = serializers.IntegerField()
     indicator_scores = serializers.DictField(child=serializers.IntegerField())
-
+    
 class AssetScorecardSerializer(serializers.Serializer):
     name = serializers.CharField()
     type = serializers.CharField()
