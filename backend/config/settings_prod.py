@@ -3,7 +3,8 @@ import os
 
 DEBUG = False
 
-ALLOWED_HOSTS = os.environ.get('ALLOWED_HOSTS', '').split(',')
+
+ALLOWED_HOSTS = ['project-m-macropulse-backend.onrender.com', 'localhost', '127.0.0.1']
 
 # Security settings
 SECURE_SSL_REDIRECT = True
