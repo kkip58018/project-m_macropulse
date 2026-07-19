@@ -4,6 +4,8 @@ import api from '../../api/client';
 
 const DataUpdates = () => {
   const [activeTab, setActiveTab] = useState('indicators');
+  const [isRefreshing, setIsRefreshing] = useState(false);
+  const [isClearingCache, setIsClearingCache] = useState(false);
   const queryClient = useQueryClient();
 
   // Indicator form
@@ -75,6 +77,31 @@ const DataUpdates = () => {
     },
     onError: (error) => alert(`Error: ${error.response?.data?.error || error.message}`),
   });
+  const refreshPutCall = useMutation({
+    mutationFn: () => api.post('/admin/refresh-put-call/'),
+    onMutate: () => setIsRefreshing(true),
+    onSettled: () => setIsRefreshing(false),
+    onSuccess: (response) => {
+      const results = response.data.results;
+      const successCount = Object.values(results).filter(v => v !== 'failed').length;
+      alert(`Put-Call ratios refreshed: ${successCount} successful, ${Object.keys(results).length - successCount} failed`);
+      queryClient.invalidateQueries(['putCallRatio']);
+    },
+    onError: (error) => alert(`Error: ${error.response?.data?.error || error.message}`),
+  });
+
+  // Clear Cache and Reload All
+  const clearCacheAndReload = useMutation({
+    mutationFn: () => api.post('/admin/clear-cache/'),
+    onMutate: () => setIsClearingCache(true),
+    onSettled: () => setIsClearingCache(false),
+    onSuccess: () => {
+      alert('Cache cleared and all data reloaded successfully');
+      queryClient.invalidateQueries();
+    },
+    onError: (error) => alert(`Error: ${error.response?.data?.error || error.message}`),
+  });
+
 
   const handleIndicatorSubmit = (e) => {
     e.preventDefault();
@@ -95,35 +122,55 @@ const DataUpdates = () => {
     e.preventDefault();
     updateStrength.mutate(strengthData);
   };
-
+  const [isRefreshingSeasonality, setIsRefreshingSeasonality] = useState(false);
+  const [seasonalityResult, setSeasonalityResult] = useState('');
+  
+  const handleRefreshSeasonality = async () => {
+    setIsRefreshingSeasonality(true);
+    setSeasonalityResult('');
+    try {
+      const response = await api.post('/admin/refresh-seasonality/');
+      const { message, details } = response.data;
+      setSeasonalityResult(
+        `✅ ${message}\n` +
+        `Processed: ${details.processed} pairs\n` +
+        `Failed: ${details.failed} pairs\n` +
+        `Monthly records: ${details.monthly_records}\n` +
+        `Annual records: ${details.annual_records}\n` +
+        (details.errors.length > 0 ? `Errors: ${details.errors.join('\n')}` : '')
+      );
+    } catch (err) {
+      setSeasonalityResult(`❌ Error: ${err.response?.data?.error || err.message}`);
+    } finally {
+      setIsRefreshingSeasonality(false);
+    }
+  };
   return (
     <div className="text-white">
       <h2 className="text-2xl font-bold mb-4">✏️ Data Updates</h2>
-
-      <div className="flex gap-2 mb-4">
-        <button
-          onClick={() => setActiveTab('indicators')}
-          className={`px-4 py-2 rounded ${activeTab === 'indicators' ? 'bg-dark-300 text-white' : 'bg-dark-200 text-gray-400'}`}
-        >
+      
+      {/* Tabs */}
+      <div className="flex gap-2 mb-4 flex-wrap">
+        <button onClick={() => setActiveTab('indicators')} className={`px-4 py-2 rounded ${activeTab === 'indicators' ? 'bg-dark-300 text-white' : 'bg-dark-200 text-gray-400'}`}>
           Indicators
         </button>
-        <button
-          onClick={() => setActiveTab('cot')}
-          className={`px-4 py-2 rounded ${activeTab === 'cot' ? 'bg-dark-300 text-white' : 'bg-dark-200 text-gray-400'}`}
-        >
+        <button onClick={() => setActiveTab('cot')} className={`px-4 py-2 rounded ${activeTab === 'cot' ? 'bg-dark-300 text-white' : 'bg-dark-200 text-gray-400'}`}>
           COT Data
         </button>
-        <button
-          onClick={() => setActiveTab('bond')}
-          className={`px-4 py-2 rounded ${activeTab === 'bond' ? 'bg-dark-300 text-white' : 'bg-dark-200 text-gray-400'}`}
-        >
+        <button onClick={() => setActiveTab('bond')} className={`px-4 py-2 rounded ${activeTab === 'bond' ? 'bg-dark-300 text-white' : 'bg-dark-200 text-gray-400'}`}>
           Bond Yield
         </button>
-        <button
-          onClick={() => setActiveTab('strength')}
-          className={`px-4 py-2 rounded ${activeTab === 'strength' ? 'bg-dark-300 text-white' : 'bg-dark-200 text-gray-400'}`}
-        >
+        <button onClick={() => setActiveTab('strength')} className={`px-4 py-2 rounded ${activeTab === 'strength' ? 'bg-dark-300 text-white' : 'bg-dark-200 text-gray-400'}`}>
           Economic Strength
+        </button>
+        <button onClick={() => setActiveTab('putcall')} className={`px-4 py-2 rounded ${activeTab === 'putcall' ? 'bg-dark-300 text-white' : 'bg-dark-200 text-gray-400'}`}>
+          Put-Call Ratio
+        </button>
+        <button onClick={() => setActiveTab('cache')} className={`px-4 py-2 rounded ${activeTab === 'cache' ? 'bg-dark-300 text-white' : 'bg-dark-200 text-gray-400'}`}>
+          Cache
+        </button>
+        <button onClick={() => setActiveTab('seasonality')} className={`px-4 py-2 rounded ${activeTab === 'seasonality' ? 'bg-dark-300 text-white' : 'bg-dark-200 text-gray-400'}`}>
+          Seasonality
         </button>
       </div>
 
@@ -393,6 +440,70 @@ const DataUpdates = () => {
               {updateStrength.isPending ? 'Updating...' : 'Update Economic Strength'}
             </button>
           </form>
+        )}
+
+        {/* Put-Call Tab */}
+        {activeTab === 'putcall' && (
+          <div>
+            <h3 className="text-lg font-semibold mb-4">Refresh Put-Call Ratios</h3>
+            <p className="text-gray-400 mb-4">Fetch the latest put/call ratios for all tracked assets from Barchart.</p>
+            <button
+              onClick={() => refreshPutCall.mutate()}
+              disabled={isRefreshing}
+              className="bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded transition disabled:opacity-50 flex items-center gap-2"
+            >
+              {isRefreshing ? (
+                <>
+                  <span className="animate-spin">⏳</span> Refreshing...
+                </>
+              ) : (
+                '🔄 Refresh Put-Call Ratios'
+              )}
+            </button>
+          </div>
+        )}
+
+        {/* Cache Tab */}
+        {activeTab === 'cache' && (
+          <div>
+            <h3 className="text-lg font-semibold mb-4">Cache Management</h3>
+            <p className="text-gray-400 mb-4">Clear the Django cache and reload all data from the database. This will force a full refresh of all pages.</p>
+            <button
+              onClick={() => clearCacheAndReload.mutate()}
+              disabled={isClearingCache}
+              className="bg-red-600 hover:bg-red-700 text-white font-bold py-2 px-4 rounded transition disabled:opacity-50 flex items-center gap-2"
+            >
+              {isClearingCache ? (
+                <>
+                  <span className="animate-spin">⏳</span> Clearing...
+                </>
+              ) : (
+                '🗑️ Clear Cache & Reload All'
+              )}
+            </button>
+          </div>
+        )}
+
+        {activeTab === 'seasonality' && (
+          <div>
+            <h3 className="text-lg font-semibold mb-4">Refresh Seasonality Data</h3>
+            <p className="text-gray-400 mb-4">
+              Fetch 10 years of historical data from Yahoo Finance and update the seasonality tables.
+              This may take a few minutes.
+            </p>
+            <button
+              onClick={handleRefreshSeasonality}
+              disabled={isRefreshingSeasonality}
+              className="bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded transition disabled:opacity-50"
+            >
+              {isRefreshingSeasonality ? '⏳ Refreshing...' : '🔄 Refresh Seasonality'}
+            </button>
+            {seasonalityResult && (
+              <div className="mt-4 p-4 bg-dark-300 rounded">
+                <pre className="text-sm text-gray-300 whitespace-pre-wrap">{seasonalityResult}</pre>
+              </div>
+            )}
+          </div>
         )}
       </div>
     </div>

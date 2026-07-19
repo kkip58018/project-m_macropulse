@@ -29,6 +29,13 @@ from .views.admin import (
     TrendSettingsView,
     RefreshCOTView,
     RefreshRetailSentimentView,
+    RefreshAllDataView,
+    RefreshPutCallView,
+    ClearCacheView,
+    RefreshSeasonalityView,
+    RemoveUserView,
+    PauseUserView,
+    UnpauseUserView,
 )
 from django.http import JsonResponse
 
@@ -70,4 +77,11 @@ urlpatterns += [
     path('admin/refresh-indicators/', RefreshIndicatorsView.as_view(), name='refresh_indicators'),
     path('admin/refresh-cot/', RefreshCOTView.as_view(), name='refresh_cot'),
     path('admin/refresh-retail-sentiment/', RefreshRetailSentimentView.as_view(), name='refresh_retail'),
+    path('admin/refresh-put-call/', RefreshPutCallView.as_view(), name='refresh_put_call'),
+    path('admin/clear-cache/', ClearCacheView.as_view(), name='clear_cache'),
+    path('admin/refresh-all-data/', RefreshAllDataView.as_view(), name='refresh_all_data'),
+    path('admin/refresh-seasonality/', RefreshSeasonalityView.as_view(), name='refresh_seasonality'),
+    path('admin/users/<str:user_id>/remove/', RemoveUserView.as_view(), name='remove_user'),
+    path('admin/users/<str:user_id>/pause/', PauseUserView.as_view(), name='pause_user'),
+    path('admin/users/<str:user_id>/unpause/', UnpauseUserView.as_view(), name='unpause_user'),
 ]

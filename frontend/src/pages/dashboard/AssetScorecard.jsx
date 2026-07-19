@@ -101,7 +101,7 @@ const AssetScorecard = () => {
                   },
                 }]}
                 layout={{
-                  height: 300,
+                  height: 230,
                   margin: { l: 0, r: 0, t: 0, b: 20 },
                   paper_bgcolor: 'transparent',
                   plot_bgcolor: 'transparent',

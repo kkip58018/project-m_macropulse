@@ -4,6 +4,7 @@ from .retail import RetailService
 from .bond_yield import BondYieldService
 from .economic_strength import EconomicStrengthService
 from .seasonality import SeasonalityService
+from .seasonality_db import SeasonalityDBService
 from .trend import TrendService
 from apps.analysis.constants import FOREX_PAIRS, STANDARD_CURRENCIES, CORE_INDICATORS, SCORING_ONLY_INDICATORS, EXTRA_INDICATORS, SCORING_EXCLUDED_INDICATORS
 from typing import Dict, List, Tuple, Optional
@@ -23,6 +24,7 @@ class Analyzer:
         self.bond_yield = BondYieldService()
         self.econ_strength = EconomicStrengthService()
         self.seasonality = SeasonalityService()
+        # self.seasonality = SeasonalityDBService
         self.trend = TrendService()
         self._usd_pc_score = 0  # Will be set if put/call data exists
    
@@ -720,3 +722,36 @@ class Analyzer:
             f"COT Net Positioning: {pos_text}",
             f"COT Weekly Change: {chg_text}"
         ]
+    
+    def load_all_data(self):
+        self.indicators = IndicatorsService()
+        self.cot = COTService()
+        self.retail = RetailService()
+        self.bond_yield = BondYieldService()
+        self.econ_strength = EconomicStrengthService()
+        self.seasonality = SeasonalityService()
+        self.trend = TrendService()
+    
+    def refresh_all_put_call(self) -> bool:
+        """Scrape put/call for all configured assets and update Turso."""
+        from apps.scrapers.put_call import fetch_and_store_all_put_call
+        # Define mapping: asset_name -> ticker
+        asset_map = {
+            'Bitcoin': 'IBIT',
+            'Gold': 'GLD',
+            'Silver': 'SLV',
+            'Nasdaq': 'QQQ',
+            'S&P500': 'SPY',
+            'USDollar': 'UUP',
+            'USOil': 'USO',
+        }
+        success = True
+        for asset, ticker in asset_map.items():
+            try:
+                ratio = fetch_and_store_all_put_call(asset, ticker)
+                if ratio is None:
+                    success = False
+            except Exception as e:
+                logger.error(f"Failed to fetch put/call for {asset}: {e}")
+                success = False
+        return success

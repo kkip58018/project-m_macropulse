@@ -246,3 +246,4 @@ class SeasonalityService:
 
         cache.set(cache_key, score, timeout=86400)
         return score
+    

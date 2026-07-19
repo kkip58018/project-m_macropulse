@@ -371,3 +371,5 @@ class EconomicHeatmapRefreshView(APIView):
         except Exception as e:
             logger.error(f"Refresh failed for {currency}: {e}")
             return Response({'error': str(e)}, status=500)
+        
+        

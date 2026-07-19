@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useAuth } from '../../context/AuthContext';
 import { Link, useNavigate } from 'react-router-dom';
 
@@ -6,8 +6,14 @@ const Login = () => {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
-  const { signIn } = useAuth();
+  const { signIn, authError } = useAuth();
   const navigate = useNavigate();
+
+  useEffect(() => {
+    if (authError) {
+      setError(authError);
+    }
+  }, [authError]);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -24,7 +30,11 @@ const Login = () => {
     <div className="min-h-screen flex items-center justify-center bg-dark-100">
       <div className="bg-dark-200 p-8 rounded-2xl border border-dark-300 w-full max-w-md">
         <h2 className="text-2xl font-bold text-white text-center mb-6">Sign In</h2>
-        {error && <div className="bg-red-500/20 text-red-400 p-3 rounded mb-4">{error}</div>}
+        {error && (
+          <div className="bg-red-500/20 text-red-400 p-3 rounded mb-4 border border-red-500/30">
+            {error}
+          </div>
+        )}
         <form onSubmit={handleSubmit}>
           <div className="mb-4">
             <label className="block text-gray-400 mb-2">Email</label>

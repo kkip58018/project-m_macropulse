@@ -5,9 +5,11 @@ from rest_framework import status
 from apps.api.permissions import IsAdminUser
 from apps.analysis.services import Analyzer
 from apps.services import supabase_client, turso_client
-from apps.analysis.constants import STANDARD_CURRENCIES, DIRECTION
+from apps.analysis.constants import STANDARD_CURRENCIES, DIRECTION, FOREX_PAIRS
 from datetime import datetime
 from django.core.cache import cache
+from apps.scrapers.put_call import fetch_and_store_put_call_ratio
+from apps.services import supabase_client, turso_client
 import logging
 
 
@@ -291,3 +293,157 @@ class RefreshRetailSentimentView(APIView):
         except Exception as e:
             logger.error(f"Refresh retail sentiment failed: {e}")
             return Response({'error': str(e)}, status=500)
+        
+class RefreshPutCallView(APIView):
+    permission_classes = [IsAuthenticated, IsAdminUser]
+
+    def post(self, request):
+        assets = [
+            ("BTC", "IBIT"),
+            ("XAU", "GLD"),
+            ("XAG", "SLV"),
+            ("NAS100", "QQQ"),
+            ("SPX500", "SPY"),
+            ("USD", "UUP"),
+            ("USOIL", "USO"),
+        ]
+        results = {}
+        for asset_name, ticker in assets:
+            ratio = fetch_and_store_put_call_ratio(asset_name, ticker, supabase_client, turso_client)
+            results[asset_name] = ratio if ratio is not None else "failed"
+        # Clear cache
+        cache.clear()
+        return Response({'message': 'Put/Call ratios refreshed', 'results': results})
+
+class ClearCacheAndReloadView(APIView):
+    permission_classes = [IsAuthenticated, IsAdminUser]
+
+    def post(self, request):
+        try:
+            from django.core.cache import cache
+            cache.clear()
+            # Reload all analyzer data
+            from apps.analysis.services.analyzer import Analyzer
+            analyzer = Analyzer()
+            analyzer.load_all_data()  # We need to implement this method
+            return Response({'message': 'Cache cleared and all data reloaded successfully'})
+        except Exception as e:
+            logger.error(f"Clear cache and reload failed: {e}")
+            return Response({'error': str(e)}, status=500)
+        
+class RefreshAllDataView(APIView):
+    permission_classes = [IsAuthenticated, IsAdminUser]
+
+    def post(self, request):
+        try:
+            cache.clear()
+            # Reload data in analyzer
+            analyzer = Analyzer()
+            analyzer.load_all_data()
+            return Response({'message': 'All data refreshed and cache cleared'})
+        except Exception as e:
+            logger.error(f"Refresh all data failed: {e}")
+            return Response({'error': str(e)}, status=500)
+        
+
+class ClearCacheView(APIView):
+    permission_classes = [IsAuthenticated, IsAdminUser]
+
+    def post(self, request):
+        cache.clear()
+        # Also reload seasonality from DB (if needed)
+        from apps.analysis.services.seasonality_db import seasonality_db
+        seasonality_db.reload()
+        return Response({'message': 'Cache cleared and data reloaded'})
+class RefreshSeasonalityView(APIView):
+    permission_classes = [IsAuthenticated, IsAdminUser]
+
+    def post(self, request):
+        try:
+            from apps.analysis.services.seasonality_db import seasonality_db
+            result = seasonality_db.refresh_from_yfinance()
+            cache.clear()
+            return Response({
+                'message': 'Seasonality data refreshed successfully',
+                'details': result
+            })
+        except Exception as e:
+            logger.error(f"Refresh seasonality failed: {e}")
+            return Response({'error': str(e)}, status=500)
+        
+class RemoveUserView(APIView):
+    permission_classes = [IsAuthenticated, IsAdminUser]
+
+    def delete(self, request, user_id):
+        try:
+            # Delete from user_profiles table
+            supabase_client.admin.table('user_profiles').delete().eq('id', user_id).execute()
+            # Also delete from auth.users (requires admin privileges)
+            supabase_client.admin.auth.admin.delete_user(user_id)
+            return Response({'message': 'User removed successfully'})
+        except Exception as e:
+            logger.error(f"Failed to remove user: {e}")
+            return Response({'error': str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
+
+class PauseUserView(APIView):
+    permission_classes = [IsAuthenticated, IsAdminUser]
+
+    def post(self, request, user_id):
+        try:
+            supabase_client.admin.table('user_profiles') \
+                .update({'paused': True}) \
+                .eq('id', user_id) \
+                .execute()
+            return Response({'message': 'User paused successfully'})
+        except Exception as e:
+            logger.error(f"Failed to pause user: {e}")
+            return Response({'error': str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
+class UnpauseUserView(APIView):
+    permission_classes = [IsAuthenticated, IsAdminUser]
+
+    def post(self, request, user_id):
+        try:
+            supabase_client.admin.table('user_profiles') \
+                .update({'paused': False}) \
+                .eq('id', user_id) \
+                .execute()
+            return Response({'message': 'User unpaused successfully'})
+        except Exception as e:
+            logger.error(f"Failed to unpause user: {e}")
+            return Response({'error': str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
+
+class ApproveUserView(APIView):
+    permission_classes = [IsAuthenticated, IsAdminUser]
+
+    def post(self, request, user_id):
+        try:
+            supabase_client.admin.table('user_profiles').update({'approved': True}).eq('id', user_id).execute()
+            return Response({'message': 'User approved successfully'})
+        except Exception as e:
+            logger.error(f"Failed to approve user: {e}")
+            return Response({'error': str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+        
+        
+class GetPendingUsersView(APIView):
+    permission_classes = [IsAuthenticated, IsAdminUser]
+
+    def get(self, request):
+        resp = supabase_client.admin.table('user_profiles') \
+            .select('id, email, created_at, approved, is_admin, paused') \
+            .eq('approved', False) \
+            .execute()
+        return Response(resp.data)
+
+
+class GetApprovedUsersView(APIView):
+    permission_classes = [IsAuthenticated, IsAdminUser]
+
+    def get(self, request):
+        resp = supabase_client.admin.table('user_profiles') \
+            .select('id, email, created_at, approved, is_admin, paused') \
+            .eq('approved', True) \
+            .execute()
+        return Response(resp.data)
