@@ -233,7 +233,6 @@ class TrendSettingsView(APIView):
         # Update in analyzer
         analyzer.trend.ma_periods = periods
         # Clear trend cache
-        from django.core.cache import cache
         cache.delete_pattern('trend_*')
         return Response({'message': 'Trend settings updated successfully', 'ma_periods': periods})
 class RefreshIndicatorsView(APIView):

@@ -31,11 +31,9 @@ import logging
 logger = logging.getLogger(__name__)
 analyzer = Analyzer()
 
-CACHE_1HOUR = 60 * 60
-CACHE_3HOURS = 60 * 60 * 3
-CACHE_6HOURS = 60 * 60 * 6
+CACHE_12HOURS = 60 * 60 * 12
 
-@method_decorator(cache_page(CACHE_1HOUR), name='dispatch')
+@method_decorator(cache_page(CACHE_12HOURS), name='dispatch')
 class TopSetupsView(APIView):
     permission_classes = [IsAuthenticated]
 
@@ -44,7 +42,7 @@ class TopSetupsView(APIView):
         serializer = TopSetupsSerializer(enriched, many=True)
         return Response(serializer.data)
     
-@method_decorator(cache_page(CACHE_1HOUR), name='dispatch')
+@method_decorator(cache_page(CACHE_12HOURS), name='dispatch')
 class AssetScorecardView(APIView):
     permission_classes = [IsAuthenticated]
 
@@ -59,7 +57,7 @@ class AssetScorecardView(APIView):
         except Exception as e:
             return Response({'error': str(e)}, status=500)
 
-@method_decorator(cache_page(CACHE_1HOUR), name='dispatch')
+@method_decorator(cache_page(CACHE_12HOURS), name='dispatch')
 class ForexScorecardView(APIView):
     permission_classes = [IsAuthenticated]
 
@@ -74,7 +72,7 @@ class ForexScorecardView(APIView):
             print(traceback.format_exc())
             return Response({'error': str(e)}, status=500)
         
-@method_decorator(cache_page(CACHE_3HOURS), name='dispatch')
+@method_decorator(cache_page(CACHE_12HOURS), name='dispatch')
 class EcoSurpriseView(APIView):
     permission_classes = [IsAuthenticated]
 
@@ -90,7 +88,7 @@ class EcoSurpriseView(APIView):
         return Response(serializer.data)
 
 
-@method_decorator(cache_page(CACHE_3HOURS), name='dispatch')
+@method_decorator(cache_page(CACHE_12HOURS), name='dispatch')
 class EconomicStrengthView(APIView):
     permission_classes = [IsAuthenticated]
 
@@ -114,7 +112,7 @@ class EconomicStrengthView(APIView):
         serializer = EconomicStrengthSerializer(data, many=True)
         return Response(serializer.data)
 
-@method_decorator(cache_page(CACHE_3HOURS), name='dispatch')
+@method_decorator(cache_page(CACHE_12HOURS), name='dispatch')
 class MonthlySeasonalityView(APIView):
     permission_classes = [IsAuthenticated]
 
@@ -128,7 +126,7 @@ class MonthlySeasonalityView(APIView):
             return Response({'error': str(e)}, status=500)
 
 
-@method_decorator(cache_page(CACHE_3HOURS), name='dispatch')
+@method_decorator(cache_page(CACHE_12HOURS), name='dispatch')
 class AnnualSeasonalityView(APIView):
     permission_classes = [IsAuthenticated]
 
@@ -141,7 +139,7 @@ class AnnualSeasonalityView(APIView):
             logger.error(f"Annual seasonality error: {e}")
             return Response({'error': str(e)}, status=500)
 
-@method_decorator(cache_page(CACHE_3HOURS), name='dispatch')
+@method_decorator(cache_page(CACHE_12HOURS), name='dispatch')
 class LatestCOTView(APIView):
     permission_classes = [IsAuthenticated]
 
@@ -224,7 +222,7 @@ class LatestCOTView(APIView):
         })
 
 
-@method_decorator(cache_page(CACHE_3HOURS), name='dispatch')
+@method_decorator(cache_page(CACHE_12HOURS), name='dispatch')
 class COTHistoryView(APIView):
     permission_classes = [IsAuthenticated]
 
@@ -247,7 +245,7 @@ class COTHistoryView(APIView):
                 })
         return Response(history_data)
 
-@method_decorator(cache_page(CACHE_3HOURS), name='dispatch')
+@method_decorator(cache_page(CACHE_12HOURS), name='dispatch')
 class RetailSentimentView(APIView):
     permission_classes = [IsAuthenticated]
 
@@ -266,7 +264,7 @@ class RetailSentimentView(APIView):
         serializer = RetailSentimentSerializer(data, many=True)
         return Response(serializer.data)
 
-@method_decorator(cache_page(CACHE_3HOURS), name='dispatch')
+@method_decorator(cache_page(CACHE_12HOURS), name='dispatch')
 class PutCallRatioView(APIView):
     permission_classes = [IsAuthenticated]
 
@@ -283,7 +281,7 @@ class PutCallRatioView(APIView):
         return Response(data)
 
 
-@method_decorator(cache_page(CACHE_3HOURS), name='dispatch')
+@method_decorator(cache_page(CACHE_12HOURS), name='dispatch')
 class EconomicHeatmapView(APIView):
     permission_classes = [IsAuthenticated]
 
@@ -322,7 +320,7 @@ class EconomicHeatmapView(APIView):
         serializer = EconomicHeatmapSerializer(data)
         return Response(serializer.data)
 
-@method_decorator(cache_page(CACHE_3HOURS), name='dispatch')
+@method_decorator(cache_page(CACHE_12HOURS), name='dispatch')
 class EconomicCalendarView(APIView):
     permission_classes = [IsAuthenticated]
 
@@ -333,7 +331,7 @@ class EconomicCalendarView(APIView):
         serializer = EconomicEventSerializer(events, many=True)
         return Response(serializer.data)
 
-@method_decorator(cache_page(CACHE_3HOURS), name='dispatch')
+@method_decorator(cache_page(CACHE_12HOURS), name='dispatch')
 class COTTrendsView(APIView):
     permission_classes = [IsAuthenticated]
 
@@ -361,7 +359,7 @@ class COTTrendsView(APIView):
             data.append({'asset': asset, 'data': asset_data})
         return Response(data)
 
-@method_decorator(cache_page(CACHE_3HOURS), name='dispatch')
+@method_decorator(cache_page(CACHE_12HOURS), name='dispatch')
 class EconomicHeatmapRefreshView(APIView):
     permission_classes = [IsAuthenticated, IsAdminUser]
 

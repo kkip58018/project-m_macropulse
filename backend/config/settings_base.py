@@ -104,9 +104,11 @@ REST_FRAMEWORK = {
     ],
 }
 
+
 CACHES = {
     'default': {
-        'BACKEND': 'django.core.cache.backends.dummy.DummyCache',
+        'BACKEND': 'django.core.cache.backends.locmem.LocMemCache',
+        'LOCATION': 'macropulse-cache',
     }
 }
 # CORS
