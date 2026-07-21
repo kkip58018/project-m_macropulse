@@ -325,11 +325,14 @@ class EconomicCalendarView(APIView):
     permission_classes = [IsAuthenticated]
 
     def get(self, request):
-        # Scrape ForexFactory
         from apps.scrapers.calendar import fetch_forexfactory_calendar
-        events = fetch_forexfactory_calendar()
-        serializer = EconomicEventSerializer(events, many=True)
-        return Response(serializer.data)
+        try:
+            events = fetch_forexfactory_calendar()
+            serializer = EconomicEventSerializer(events, many=True)
+            return Response(serializer.data)
+        except Exception as e:
+            logger.error(f"Calendar error: {e}")
+            return Response({'error': str(e)}, status=500)
 
 @method_decorator(cache_page(CACHE_12HOURS), name='dispatch')
 class COTTrendsView(APIView):

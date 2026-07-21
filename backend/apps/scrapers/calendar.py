@@ -4,6 +4,7 @@ import re
 from datetime import datetime, timedelta
 import logging
 import cloudscraper
+import time
 
 logger = logging.getLogger(__name__)
 
@@ -13,18 +14,17 @@ EXCLUDED_WORDS = [
     "RatingDog", "Empire",
 ]
 
-
 def fetch_forexfactory_calendar():
-    """
-    Scrape ForexFactory calendar and return events with times converted to EAT.
-    """
+    """Scrape ForexFactory calendar and return events with EAT time."""
     url = "https://www.forexfactory.com/calendar?week=this"
     headers = {
-        "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36",
+        "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/114.0.0.0 Safari/537.36",
         "Accept": "application/json, text/html, application/xhtml+xml",
+        "Accept-Language": "en-US,en;q=0.9",
     }
 
     try:
+        # Try with requests first
         response = requests.get(url, headers=headers, timeout=15)
         if response.status_code != 200:
             # Fallback to cloudscraper
@@ -35,7 +35,11 @@ def fetch_forexfactory_calendar():
             return []
 
         soup = BeautifulSoup(response.text, "html.parser")
+        # Try multiple table selectors
         table = soup.find("table", class_="calendar__table")
+        if not table:
+            # Fallback: find any table with calendar class
+            table = soup.find("table", class_=re.compile("calendar"))
         if not table:
             logger.error("Could not find calendar table on ForexFactory")
             return []
