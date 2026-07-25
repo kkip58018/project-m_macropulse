@@ -320,9 +320,9 @@ class EconomicHeatmapView(APIView):
         serializer = EconomicHeatmapSerializer(data)
         return Response(serializer.data)
 
-@method_decorator(cache_page(CACHE_12HOURS), name='dispatch')
+
 class EconomicCalendarView(APIView):
-    permission_classes = [IsAuthenticated]
+    # permission_classes = [IsAuthenticated]
 
     def get(self, request):
         from apps.scrapers.calendar import fetch_forexfactory_calendar
