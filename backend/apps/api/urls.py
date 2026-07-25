@@ -36,6 +36,7 @@ from .views.admin import (
     RemoveUserView,
     PauseUserView,
     UnpauseUserView,
+    RefreshAllIndicatorsView,
 )
 from django.http import JsonResponse
 
@@ -84,4 +85,5 @@ urlpatterns += [
     path('admin/users/<str:user_id>/remove/', RemoveUserView.as_view(), name='remove_user'),
     path('admin/users/<str:user_id>/pause/', PauseUserView.as_view(), name='pause_user'),
     path('admin/users/<str:user_id>/unpause/', UnpauseUserView.as_view(), name='unpause_user'),
+    path('admin/refresh-all-indicators/', RefreshAllIndicatorsView.as_view(), name='refresh_all_indicators'),
 ]

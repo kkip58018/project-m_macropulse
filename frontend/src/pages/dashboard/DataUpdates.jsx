@@ -16,13 +16,15 @@ const CORE_INDICATORS = [
 const SCORING_ONLY_INDICATORS = ['Consumer Confidence'];
 
 const EXTRA_INDICATORS = {
-  USD: ['PCE YoY', 'NFP', 'Unemployment claims', 'ADP', 'JOLTS job openings', 'Average Hourly Earnings'],
-  JPY: ['Household spending'],
+  USD: ['PCE YoY', 'NFP', 'Unemployment Claims', 'ADP', 'JOLTS Job Openings', 'Average Hourly Earnings'],
+  JPY: ['Household Spending YoY'],
 };
 
 const SCORING_EXCLUDED_INDICATORS = {
   USD: ['Average Hourly Earnings'],
 };
+
+const CURRENCIES = ['USD', 'EUR', 'GBP', 'AUD', 'CAD', 'NZD', 'CHF', 'JPY'];
 
 const getIndicatorsForCurrency = (currency) => {
   const base = [...CORE_INDICATORS, ...SCORING_ONLY_INDICATORS];
@@ -106,6 +108,24 @@ const DataUpdates = () => {
     onError: (error) => alert(`Error: ${error.response?.data?.error || error.message}`),
   });
 
+  const refreshIndicators = useMutation({
+    mutationFn: (currency) => api.post('/admin/refresh-indicators/', { currency }),
+    onSuccess: (response) => {
+      alert(`Refresh completed: ${response.data.message}`);
+      queryClient.invalidateQueries(['economicHeatmap']);
+    },
+    onError: (error) => alert(`Error: ${error.response?.data?.error || error.message}`),
+  });
+
+  const refreshAllIndicators = useMutation({
+    mutationFn: () => api.post('/admin/refresh-all-indicators/'),
+    onSuccess: (response) => {
+      alert(`All indicators refreshed: ${response.data.message}`);
+      queryClient.invalidateQueries(['economicHeatmap']);
+    },
+    onError: (error) => alert(`Error: ${error.response?.data?.error || error.message}`),
+  });
+
   const clearCache = useMutation({
     mutationFn: () => api.post('/admin/clear-cache/'),
     onSuccess: () => {
@@ -142,7 +162,6 @@ const DataUpdates = () => {
     updateStrength.mutate(strengthData);
   };
 
-  // Get available indicators for selected currency
   const availableIndicators = getIndicatorsForCurrency(indicatorData.currency);
 
   return (
@@ -191,95 +210,109 @@ const DataUpdates = () => {
       <div className="bg-dark-200 p-6 rounded-lg border border-dark-300">
         {/* Indicators Tab */}
         {activeTab === 'indicators' && (
-          <form onSubmit={handleIndicatorSubmit}>
-            <h3 className="text-lg font-semibold mb-4">Update Economic Indicator</h3>
-            <div className="grid grid-cols-2 gap-4">
-              <div>
-                <label className="block text-gray-400 text-sm mb-1">Currency</label>
-                <select
-                  value={indicatorData.currency}
-                  onChange={(e) => {
-                    const newCurrency = e.target.value;
-                    // Reset indicator to first available
-                    const newIndicators = getIndicatorsForCurrency(newCurrency);
-                    setIndicatorData({
-                      ...indicatorData,
-                      currency: newCurrency,
-                      indicator: newIndicators.length > 0 ? newIndicators[0] : '',
-                    });
-                  }}
-                  className="w-full bg-dark-300 border border-dark-400 rounded px-3 py-2 text-white"
+          <div>
+            <div className="flex justify-between items-center mb-4">
+              <h3 className="text-lg font-semibold">Update Economic Indicator</h3>
+              <div className="flex gap-2">
+                <button
+                  onClick={() => refreshIndicators.mutate(indicatorData.currency)}
+                  className="bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded transition text-sm"
+                  disabled={refreshIndicators.isPending}
                 >
-                  <option value="USD">USD</option>
-                  <option value="EUR">EUR</option>
-                  <option value="GBP">GBP</option>
-                  <option value="JPY">JPY</option>
-                  <option value="AUD">AUD</option>
-                  <option value="CAD">CAD</option>
-                  <option value="CHF">CHF</option>
-                  <option value="NZD">NZD</option>
-                </select>
-              </div>
-              <div>
-                <label className="block text-gray-400 text-sm mb-1">Indicator</label>
-                <select
-                  value={indicatorData.indicator}
-                  onChange={(e) => setIndicatorData({ ...indicatorData, indicator: e.target.value })}
-                  className="w-full bg-dark-300 border border-dark-400 rounded px-3 py-2 text-white"
+                  {refreshIndicators.isPending ? 'Refreshing...' : `Refresh ${indicatorData.currency}`}
+                </button>
+                <button
+                  onClick={() => refreshAllIndicators.mutate()}
+                  className="bg-green-600 hover:bg-green-700 text-white font-bold py-2 px-4 rounded transition text-sm"
+                  disabled={refreshAllIndicators.isPending}
                 >
-                  {availableIndicators.map((ind) => (
-                    <option key={ind} value={ind}>{ind}</option>
-                  ))}
-                </select>
-              </div>
-              <div>
-                <label className="block text-gray-400 text-sm mb-1">Actual</label>
-                <input
-                  type="number"
-                  step="any"
-                  value={indicatorData.actual}
-                  onChange={(e) => setIndicatorData({ ...indicatorData, actual: e.target.value })}
-                  className="w-full bg-dark-300 border border-dark-400 rounded px-3 py-2 text-white"
-                />
-              </div>
-              <div>
-                <label className="block text-gray-400 text-sm mb-1">Forecast</label>
-                <input
-                  type="number"
-                  step="any"
-                  value={indicatorData.forecast}
-                  onChange={(e) => setIndicatorData({ ...indicatorData, forecast: e.target.value })}
-                  className="w-full bg-dark-300 border border-dark-400 rounded px-3 py-2 text-white"
-                />
-              </div>
-              <div>
-                <label className="block text-gray-400 text-sm mb-1">Date</label>
-                <input
-                  type="date"
-                  value={indicatorData.date}
-                  onChange={(e) => setIndicatorData({ ...indicatorData, date: e.target.value })}
-                  className="w-full bg-dark-300 border border-dark-400 rounded px-3 py-2 text-white"
-                />
-              </div>
-              <div>
-                <label className="block text-gray-400 text-sm mb-1">Previous (optional)</label>
-                <input
-                  type="number"
-                  step="any"
-                  value={indicatorData.previous}
-                  onChange={(e) => setIndicatorData({ ...indicatorData, previous: e.target.value })}
-                  className="w-full bg-dark-300 border border-dark-400 rounded px-3 py-2 text-white"
-                />
+                  {refreshAllIndicators.isPending ? 'Refreshing All...' : 'Refresh All Currencies'}
+                </button>
               </div>
             </div>
-            <button
-              type="submit"
-              className="mt-4 bg-green-600 hover:bg-green-700 text-white font-bold py-2 px-4 rounded transition"
-              disabled={updateIndicator.isPending}
-            >
-              {updateIndicator.isPending ? 'Updating...' : 'Update Indicator'}
-            </button>
-          </form>
+            <form onSubmit={handleIndicatorSubmit}>
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <label className="block text-gray-400 text-sm mb-1">Currency</label>
+                  <select
+                    value={indicatorData.currency}
+                    onChange={(e) => {
+                      const newCurrency = e.target.value;
+                      const newIndicators = getIndicatorsForCurrency(newCurrency);
+                      setIndicatorData({
+                        ...indicatorData,
+                        currency: newCurrency,
+                        indicator: newIndicators.length > 0 ? newIndicators[0] : '',
+                      });
+                    }}
+                    className="w-full bg-dark-300 border border-dark-400 rounded px-3 py-2 text-white"
+                  >
+                    {CURRENCIES.map((c) => (
+                      <option key={c} value={c}>{c}</option>
+                    ))}
+                  </select>
+                </div>
+                <div>
+                  <label className="block text-gray-400 text-sm mb-1">Indicator</label>
+                  <select
+                    value={indicatorData.indicator}
+                    onChange={(e) => setIndicatorData({ ...indicatorData, indicator: e.target.value })}
+                    className="w-full bg-dark-300 border border-dark-400 rounded px-3 py-2 text-white"
+                  >
+                    {availableIndicators.map((ind) => (
+                      <option key={ind} value={ind}>{ind}</option>
+                    ))}
+                  </select>
+                </div>
+                <div>
+                  <label className="block text-gray-400 text-sm mb-1">Actual</label>
+                  <input
+                    type="number"
+                    step="any"
+                    value={indicatorData.actual}
+                    onChange={(e) => setIndicatorData({ ...indicatorData, actual: e.target.value })}
+                    className="w-full bg-dark-300 border border-dark-400 rounded px-3 py-2 text-white"
+                  />
+                </div>
+                <div>
+                  <label className="block text-gray-400 text-sm mb-1">Forecast</label>
+                  <input
+                    type="number"
+                    step="any"
+                    value={indicatorData.forecast}
+                    onChange={(e) => setIndicatorData({ ...indicatorData, forecast: e.target.value })}
+                    className="w-full bg-dark-300 border border-dark-400 rounded px-3 py-2 text-white"
+                  />
+                </div>
+                <div>
+                  <label className="block text-gray-400 text-sm mb-1">Date</label>
+                  <input
+                    type="date"
+                    value={indicatorData.date}
+                    onChange={(e) => setIndicatorData({ ...indicatorData, date: e.target.value })}
+                    className="w-full bg-dark-300 border border-dark-400 rounded px-3 py-2 text-white"
+                  />
+                </div>
+                <div>
+                  <label className="block text-gray-400 text-sm mb-1">Previous (optional)</label>
+                  <input
+                    type="number"
+                    step="any"
+                    value={indicatorData.previous}
+                    onChange={(e) => setIndicatorData({ ...indicatorData, previous: e.target.value })}
+                    className="w-full bg-dark-300 border border-dark-400 rounded px-3 py-2 text-white"
+                  />
+                </div>
+              </div>
+              <button
+                type="submit"
+                className="mt-4 bg-green-600 hover:bg-green-700 text-white font-bold py-2 px-4 rounded transition"
+                disabled={updateIndicator.isPending}
+              >
+                {updateIndicator.isPending ? 'Updating...' : 'Update Indicator'}
+              </button>
+            </form>
+          </div>
         )}
 
         {/* COT Tab */}
@@ -361,14 +394,9 @@ const DataUpdates = () => {
                   onChange={(e) => setBondData({ ...bondData, currency: e.target.value })}
                   className="w-full bg-dark-300 border border-dark-400 rounded px-3 py-2 text-white"
                 >
-                  <option value="USD">USD</option>
-                  <option value="EUR">EUR</option>
-                  <option value="GBP">GBP</option>
-                  <option value="JPY">JPY</option>
-                  <option value="AUD">AUD</option>
-                  <option value="CAD">CAD</option>
-                  <option value="CHF">CHF</option>
-                  <option value="NZD">NZD</option>
+                  {CURRENCIES.map((c) => (
+                    <option key={c} value={c}>{c}</option>
+                  ))}
                 </select>
               </div>
               <div>
@@ -406,14 +434,9 @@ const DataUpdates = () => {
                   onChange={(e) => setStrengthData({ ...strengthData, currency: e.target.value })}
                   className="w-full bg-dark-300 border border-dark-400 rounded px-3 py-2 text-white"
                 >
-                  <option value="USD">USD</option>
-                  <option value="EUR">EUR</option>
-                  <option value="GBP">GBP</option>
-                  <option value="JPY">JPY</option>
-                  <option value="AUD">AUD</option>
-                  <option value="CAD">CAD</option>
-                  <option value="CHF">CHF</option>
-                  <option value="NZD">NZD</option>
+                  {CURRENCIES.map((c) => (
+                    <option key={c} value={c}>{c}</option>
+                  ))}
                 </select>
               </div>
               <div>

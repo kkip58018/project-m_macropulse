@@ -11,6 +11,11 @@ from django.core.cache import cache
 from apps.scrapers.put_call import fetch_and_store_put_call_ratio
 from apps.services import supabase_client, turso_client
 import logging
+from curl_cffi import requests
+from bs4 import BeautifulSoup
+import time
+from apps.analysis.constants import ECON_SCRAPE_URLS, DIRECTION
+
 
 
 logger = logging.getLogger(__name__)
@@ -447,3 +452,139 @@ class GetApprovedUsersView(APIView):
             .eq('approved', True) \
             .execute()
         return Response(resp.data)
+
+class RefreshAllIndicatorsView(APIView):
+    permission_classes = [IsAuthenticated, IsAdminUser]
+
+    def post(self, request):
+        headers = {
+            "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/114.0.0.0 Safari/537.36",
+            "Accept": "application/json, text/plain, */*",
+            "Accept-Language": "en-US,en;q=0.9",
+            "Origin": "https://www.investing.com",
+            "Referer": "https://www.investing.com/",
+            "Sec-Fetch-Dest": "empty",
+            "Sec-Fetch-Mode": "cors",
+            "Sec-Fetch-Site": "same-site",
+        }
+
+        def clean_value(val):
+            if val in [None, "N/A", ""]:
+                return None
+            val_str = str(val)
+            for char in ["%", "K", "M", "B", ","]:
+                val_str = val_str.replace(char, "")
+            try:
+                return float(val_str)
+            except:
+                return None
+
+        def scrape_data(url):
+            if not url:
+                return None
+            try:
+                response = requests.get(url, headers=headers, timeout=10, impersonate="chrome120")
+                if response.status_code != 200:
+                    return None
+
+                if "investing.com" in url:
+                    try:
+                        json_data = response.json()
+                        occurrences = json_data.get("occurrences", [])
+                        if not occurrences:
+                            return None
+                        latest = None
+                        for occ in occurrences:
+                            if occ.get("actual") is not None:
+                                latest = occ
+                                break
+                        if not latest:
+                            latest = occurrences[0]
+                        raw_time = latest.get("occurrence_time", "")
+                        date_str = raw_time.split("T")[0] if "T" in raw_time else raw_time
+                        return {
+                            "date": date_str,
+                            "actual": clean_value(latest.get("actual")),
+                            "previous": clean_value(latest.get("previous")),
+                            "forecast": clean_value(latest.get("forecast")),
+                        }
+                    except:
+                        pass
+
+                elif "tradingeconomics.com" in url:
+                    soup = BeautifulSoup(response.text, "html.parser")
+                    table = soup.find("table", class_="table")
+                    if table:
+                        rows = table.find_all("tr")
+                        if len(rows) > 2:
+                            cols = rows[2].find_all("td")
+                            if len(cols) >= 7:
+                                return {
+                                    "date": cols[0].text.strip(),
+                                    "actual": clean_value(cols[4].text.strip()),
+                                    "previous": clean_value(cols[5].text.strip()),
+                                    "forecast": clean_value(cols[6].text.strip()),
+                                }
+                            elif len(cols) >= 6:
+                                return {
+                                    "date": cols[0].text.strip(),
+                                    "actual": clean_value(cols[3].text.strip()),
+                                    "previous": clean_value(cols[4].text.strip()),
+                                    "forecast": clean_value(cols[5].text.strip()),
+                                }
+                return None
+            except Exception as e:
+                logger.error(f"Scraping error for {url}: {e}")
+                return None
+
+        total_updated = 0
+        total_failed = 0
+        results = []
+
+        for key, urls in ECON_SCRAPE_URLS.items():
+            if not urls.get("primary") and not urls.get("fallback"):
+                continue
+
+            currency_code = key.split(" - ")[0]
+            indicator_name = key.split(" - ")[1]
+
+            scraped = None
+            if urls.get("primary"):
+                scraped = scrape_data(urls["primary"])
+            if not scraped and urls.get("fallback"):
+                scraped = scrape_data(urls["fallback"])
+                time.sleep(0.5)
+
+            if scraped and scraped["actual"] is not None and scraped["forecast"] is not None:
+                direction = DIRECTION.get(indicator_name, "higher")
+                if direction == "higher":
+                    score = 1 if scraped["actual"] > scraped["forecast"] else -1 if scraped["actual"] < scraped["forecast"] else 0
+                else:
+                    score = 1 if scraped["actual"] < scraped["forecast"] else -1 if scraped["actual"] > scraped["forecast"] else 0
+
+                data = {
+                    'currency_code': currency_code,
+                    'indicator_name': indicator_name,
+                    'actual_value': scraped["actual"],
+                    'forecast_value': scraped["forecast"],
+                    'release_date': scraped["date"],
+                    'previous_value': scraped["previous"],
+                    'score': score,
+                }
+                success = supabase_client.upsert_indicator(data)
+                if success:
+                    total_updated += 1
+                else:
+                    total_failed += 1
+                    results.append(f"{key} (DB error)")
+            else:
+                total_failed += 1
+                results.append(f"{key} (scrape failed)")
+
+            time.sleep(1.5)  # Delay between indicators
+
+        cache.clear()
+        msg = f"Updated {total_updated} indicators, failed {total_failed}"
+        if results:
+            msg += f". Failures: {', '.join(results[:10])}"
+        return Response({'message': msg, 'updated': total_updated, 'failed': total_failed})

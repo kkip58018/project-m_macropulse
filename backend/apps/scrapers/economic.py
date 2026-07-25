@@ -248,3 +248,28 @@ def refresh_currency_indicators(currency_code):
         message += f" (failed: {', '.join(failed_indicators[:5])})"
         
     return updated, message
+# apps/scrapers/economic.py
+
+from apps.analysis.constants import STANDARD_CURRENCIES
+from .economic import refresh_currency_indicators
+
+def refresh_all_currency_indicators():
+    """
+    Refresh all indicators for all currencies.
+    Returns (total_updated, total_failed, details_dict)
+    """
+    total_updated = 0
+    total_failed = 0
+    details = {}
+
+    for currency in STANDARD_CURRENCIES:
+        try:
+            updated, failed, msg = refresh_currency_indicators(currency)
+            total_updated += updated
+            total_failed += failed
+            details[currency] = {'updated': updated, 'failed': failed, 'message': msg}
+        except Exception as e:
+            details[currency] = {'updated': 0, 'failed': 0, 'message': str(e)}
+            total_failed += 1
+
+    return total_updated, total_failed, details
