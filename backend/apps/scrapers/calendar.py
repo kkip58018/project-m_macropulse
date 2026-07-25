@@ -4,8 +4,6 @@ import re
 from datetime import datetime, timedelta
 import logging
 import cloudscraper
-import json
-from django.core.cache import cache
 
 logger = logging.getLogger(__name__)
 
@@ -15,62 +13,49 @@ EXCLUDED_WORDS = [
     "RatingDog", "Empire",
 ]
 
-# Fallback sample data (in case scraping fails)
-FALLBACK_EVENTS = [
-    {"date_time": "2025-01-15 08:30", "currency": "USD", "event": "CPI YoY", "actual": "3.2%", "forecast": "3.1%", "previous": "3.4%"},
-    {"date_time": "2025-01-16 14:00", "currency": "EUR", "event": "ECB Interest Rate Decision", "actual": "4.25%", "forecast": "4.25%", "previous": "4.50%"},
-]
-
 
 def fetch_forexfactory_calendar():
     """
     Scrape ForexFactory calendar and return events with times converted to EAT.
-    Falls back to cached data or sample if scraping fails.
     """
-    cache_key = "forexfactory_calendar"
-    cached = cache.get(cache_key)
-    if cached:
-        logger.info("Returning cached calendar data")
-        return cached
-
     url = "https://www.forexfactory.com/calendar?week=this"
     headers = {
-        "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/114.0.0.0 Safari/537.36",
-        "Accept": "text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,*/*;q=0.8",
-        "Accept-Language": "en-US,en;q=0.9",
+        "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36",
+        "Accept": "application/json, text/html, application/xhtml+xml",
     }
 
     try:
-        # Try with cloudscraper first (more robust)
-        scraper = cloudscraper.create_scraper()
-        response = scraper.get(url, headers=headers, timeout=15)
+        response = requests.get(url, headers=headers, timeout=15)
         if response.status_code != 200:
-            # Try standard requests as fallback
-            response = requests.get(url, headers=headers, timeout=15)
+            # Fallback to cloudscraper
+            scraper = cloudscraper.create_scraper()
+            response = scraper.get(url, headers=headers, timeout=15)
         if response.status_code != 200:
             logger.error(f"Failed to fetch calendar (HTTP {response.status_code})")
-            # Return fallback data
-            return _get_fallback_events()
+            return []
 
         soup = BeautifulSoup(response.text, "html.parser")
         table = soup.find("table", class_="calendar__table")
         if not table:
             logger.error("Could not find calendar table on ForexFactory")
-            return _get_fallback_events()
+            return []
 
         parsed = []
         current_date = "Unknown Date"
         excluded_lower = [w.lower() for w in EXCLUDED_WORDS]
 
         for row in table.find_all("tr", class_="calendar__row"):
+            # Parse Date & Convert ET to Kenyan Time (EAT)
             date_cell = row.find("td", class_="calendar__date")
             if date_cell and date_cell.text.strip():
                 raw_date = " ".join(date_cell.text.split())
+                # Look for times like "8:30am" or "2:00pm"
                 time_match = re.search(r'(\d{1,2}:\d{2})([a-p]m)', raw_date.lower())
                 if time_match:
                     try:
                         time_str = time_match.group(0)
                         dt_obj = datetime.strptime(time_str, "%I:%M%p")
+                        # ForexFactory defaults to US Eastern Time. EDT to EAT is +7 hours
                         dt_eat = dt_obj + timedelta(hours=7)
                         eat_time_str = dt_eat.strftime("%I:%M %p")
                         current_date = raw_date.lower().replace(time_str, f"{eat_time_str} (EAT)").upper()
@@ -79,10 +64,15 @@ def fetch_forexfactory_calendar():
                 else:
                     current_date = raw_date
 
+            # Currency
             currency_cell = row.find("td", class_="calendar__currency")
             currency = currency_cell.text.strip() if currency_cell else ""
+
+            # Event
             event_cell = row.find("td", class_="calendar__event")
             event_name = event_cell.text.strip() if event_cell else ""
+
+            # Actual, Forecast, Previous
             actual_cell = row.find("td", class_="calendar__actual")
             actual = actual_cell.text.strip() if actual_cell else ""
             forecast_cell = row.find("td", class_="calendar__forecast")
@@ -101,6 +91,8 @@ def fetch_forexfactory_calendar():
                 continue
 
             is_matched = False
+
+            # Global keywords
             global_keywords = [
                 "gdp", "retail sales", "manufacturing pmi", "services pmi",
                 "cpi", "ppi", "unemployment rate", "employment change",
@@ -109,22 +101,46 @@ def fetch_forexfactory_calendar():
             if any(kw in event_lower for kw in global_keywords):
                 is_matched = True
 
-            if currency_upper == "USD":
-                usd_keywords = ["pce", "non-farm employment change", "unemployment claims", "adp", "jolts job openings", "average hourly earnings", "federal funds rate", "fomc statement"]
-                if any(kw in event_lower for kw in usd_keywords):
-                    is_matched = True
+            # USD only
+            usd_keywords = [
+                "pce", "non-farm employment change", "unemployment claims",
+                "adp", "jolts job openings", "average hourly earnings",
+                "federal funds rate", "fomc statement",
+            ]
+            if currency_upper == "USD" and any(kw in event_lower for kw in usd_keywords):
+                is_matched = True
 
-            if currency_upper == "JPY" and any(kw in event_lower for kw in ["household spending", "boj policy rate"]):
+            # JPY only
+            jpy_keywords = ["household spending", "boj policy rate"]
+            if currency_upper == "JPY" and any(kw in event_lower for kw in jpy_keywords):
                 is_matched = True
-            if currency_upper == "AUD" and any(kw in event_lower for kw in ["cash rate", "rba rate statement"]):
+
+            # AUD only
+            aud_keywords = ["cash rate", "rba rate statement"]
+            if currency_upper == "AUD" and any(kw in event_lower for kw in aud_keywords):
                 is_matched = True
-            if currency_upper == "NZD" and any(kw in event_lower for kw in ["manufacturing index", "services index", "official cash rate", "rbnz rate statement"]):
+
+            # NZD only
+            nzd_keywords = [
+                "manufacturing index", "services index",
+                "official cash rate", "rbnz rate statement",
+            ]
+            if currency_upper == "NZD" and any(kw in event_lower for kw in nzd_keywords):
                 is_matched = True
-            if currency_upper == "CAD" and any(kw in event_lower for kw in ["overnight rate", "boc rate statement"]):
+
+            # CAD only
+            cad_keywords = ["overnight rate", "boc rate statement"]
+            if currency_upper == "CAD" and any(kw in event_lower for kw in cad_keywords):
                 is_matched = True
-            if currency_upper == "GBP" and any(kw in event_lower for kw in ["official bank rate", "boe monetary policy report"]):
+
+            # GBP only
+            gbp_keywords = ["official bank rate", "boe monetary policy report"]
+            if currency_upper == "GBP" and any(kw in event_lower for kw in gbp_keywords):
                 is_matched = True
-            if currency_upper == "EUR" and any(kw in event_lower for kw in ["main refinancing rate", "monetary policy statement"]):
+
+            # EUR only
+            eur_keywords = ["main refinancing rate", "monetary policy statement"]
+            if currency_upper == "EUR" and any(kw in event_lower for kw in eur_keywords):
                 is_matched = True
 
             if is_matched:
@@ -137,19 +153,8 @@ def fetch_forexfactory_calendar():
                     "previous": previous,
                 })
 
-        if not parsed:
-            logger.warning("No events parsed, using fallback")
-            return _get_fallback_events()
-
-        # Cache for 6 hours
-        cache.set(cache_key, parsed, timeout=21600)
         return parsed
 
     except Exception as e:
         logger.error(f"Error scraping ForexFactory: {e}")
-        return _get_fallback_events()
-
-
-def _get_fallback_events():
-    """Return fallback events if scraping fails."""
-    return FALLBACK_EVENTS
+        return []
