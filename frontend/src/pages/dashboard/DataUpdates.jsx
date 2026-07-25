@@ -2,10 +2,38 @@ import { useState } from 'react';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import api from '../../api/client';
 
+// Indicator definitions (mirroring backend constants)
+const CORE_INDICATORS = [
+  'GDP',
+  'Retail Sales',
+  'Manufacturing PMI',
+  'Services PMI',
+  'CPI YoY',
+  'PPI YoY',
+  'Unemployment Rate',
+];
+
+const SCORING_ONLY_INDICATORS = ['Consumer Confidence'];
+
+const EXTRA_INDICATORS = {
+  USD: ['PCE YoY', 'NFP', 'Unemployment claims', 'ADP', 'JOLTS job openings', 'Average Hourly Earnings'],
+  JPY: ['Household spending'],
+};
+
+const SCORING_EXCLUDED_INDICATORS = {
+  USD: ['Average Hourly Earnings'],
+};
+
+const getIndicatorsForCurrency = (currency) => {
+  const base = [...CORE_INDICATORS, ...SCORING_ONLY_INDICATORS];
+  const extras = EXTRA_INDICATORS[currency] || [];
+  const excluded = SCORING_EXCLUDED_INDICATORS[currency] || [];
+  const combined = [...base, ...extras];
+  return combined.filter(ind => !excluded.includes(ind));
+};
+
 const DataUpdates = () => {
   const [activeTab, setActiveTab] = useState('indicators');
-  const [isRefreshing, setIsRefreshing] = useState(false);
-  const [isClearingCache, setIsClearingCache] = useState(false);
   const queryClient = useQueryClient();
 
   // Indicator form
@@ -77,31 +105,22 @@ const DataUpdates = () => {
     },
     onError: (error) => alert(`Error: ${error.response?.data?.error || error.message}`),
   });
-  const refreshPutCall = useMutation({
-    mutationFn: () => api.post('/admin/refresh-put-call/'),
-    onMutate: () => setIsRefreshing(true),
-    onSettled: () => setIsRefreshing(false),
-    onSuccess: (response) => {
-      const results = response.data.results;
-      const successCount = Object.values(results).filter(v => v !== 'failed').length;
-      alert(`Put-Call ratios refreshed: ${successCount} successful, ${Object.keys(results).length - successCount} failed`);
-      queryClient.invalidateQueries(['putCallRatio']);
-    },
-    onError: (error) => alert(`Error: ${error.response?.data?.error || error.message}`),
-  });
 
-  // Clear Cache and Reload All
-  const clearCacheAndReload = useMutation({
+  const clearCache = useMutation({
     mutationFn: () => api.post('/admin/clear-cache/'),
-    onMutate: () => setIsClearingCache(true),
-    onSettled: () => setIsClearingCache(false),
     onSuccess: () => {
-      alert('Cache cleared and all data reloaded successfully');
-      queryClient.invalidateQueries();
+      alert('Cache cleared successfully');
     },
     onError: (error) => alert(`Error: ${error.response?.data?.error || error.message}`),
   });
 
+  const refreshSeasonality = useMutation({
+    mutationFn: () => api.post('/admin/refresh-seasonality/'),
+    onSuccess: (response) => {
+      alert(`Seasonality refreshed: ${response.data.message}`);
+    },
+    onError: (error) => alert(`Error: ${error.response?.data?.error || error.message}`),
+  });
 
   const handleIndicatorSubmit = (e) => {
     e.preventDefault();
@@ -122,55 +141,50 @@ const DataUpdates = () => {
     e.preventDefault();
     updateStrength.mutate(strengthData);
   };
-  const [isRefreshingSeasonality, setIsRefreshingSeasonality] = useState(false);
-  const [seasonalityResult, setSeasonalityResult] = useState('');
-  
-  const handleRefreshSeasonality = async () => {
-    setIsRefreshingSeasonality(true);
-    setSeasonalityResult('');
-    try {
-      const response = await api.post('/admin/refresh-seasonality/');
-      const { message, details } = response.data;
-      setSeasonalityResult(
-        `✅ ${message}\n` +
-        `Processed: ${details.processed} pairs\n` +
-        `Failed: ${details.failed} pairs\n` +
-        `Monthly records: ${details.monthly_records}\n` +
-        `Annual records: ${details.annual_records}\n` +
-        (details.errors.length > 0 ? `Errors: ${details.errors.join('\n')}` : '')
-      );
-    } catch (err) {
-      setSeasonalityResult(`❌ Error: ${err.response?.data?.error || err.message}`);
-    } finally {
-      setIsRefreshingSeasonality(false);
-    }
-  };
+
+  // Get available indicators for selected currency
+  const availableIndicators = getIndicatorsForCurrency(indicatorData.currency);
+
   return (
     <div className="text-white">
       <h2 className="text-2xl font-bold mb-4">✏️ Data Updates</h2>
-      
-      {/* Tabs */}
+
       <div className="flex gap-2 mb-4 flex-wrap">
-        <button onClick={() => setActiveTab('indicators')} className={`px-4 py-2 rounded ${activeTab === 'indicators' ? 'bg-dark-300 text-white' : 'bg-dark-200 text-gray-400'}`}>
+        <button
+          onClick={() => setActiveTab('indicators')}
+          className={`px-4 py-2 rounded ${activeTab === 'indicators' ? 'bg-dark-300 text-white' : 'bg-dark-200 text-gray-400'}`}
+        >
           Indicators
         </button>
-        <button onClick={() => setActiveTab('cot')} className={`px-4 py-2 rounded ${activeTab === 'cot' ? 'bg-dark-300 text-white' : 'bg-dark-200 text-gray-400'}`}>
+        <button
+          onClick={() => setActiveTab('cot')}
+          className={`px-4 py-2 rounded ${activeTab === 'cot' ? 'bg-dark-300 text-white' : 'bg-dark-200 text-gray-400'}`}
+        >
           COT Data
         </button>
-        <button onClick={() => setActiveTab('bond')} className={`px-4 py-2 rounded ${activeTab === 'bond' ? 'bg-dark-300 text-white' : 'bg-dark-200 text-gray-400'}`}>
+        <button
+          onClick={() => setActiveTab('bond')}
+          className={`px-4 py-2 rounded ${activeTab === 'bond' ? 'bg-dark-300 text-white' : 'bg-dark-200 text-gray-400'}`}
+        >
           Bond Yield
         </button>
-        <button onClick={() => setActiveTab('strength')} className={`px-4 py-2 rounded ${activeTab === 'strength' ? 'bg-dark-300 text-white' : 'bg-dark-200 text-gray-400'}`}>
+        <button
+          onClick={() => setActiveTab('strength')}
+          className={`px-4 py-2 rounded ${activeTab === 'strength' ? 'bg-dark-300 text-white' : 'bg-dark-200 text-gray-400'}`}
+        >
           Economic Strength
         </button>
-        <button onClick={() => setActiveTab('putcall')} className={`px-4 py-2 rounded ${activeTab === 'putcall' ? 'bg-dark-300 text-white' : 'bg-dark-200 text-gray-400'}`}>
-          Put-Call Ratio
-        </button>
-        <button onClick={() => setActiveTab('cache')} className={`px-4 py-2 rounded ${activeTab === 'cache' ? 'bg-dark-300 text-white' : 'bg-dark-200 text-gray-400'}`}>
-          Cache
-        </button>
-        <button onClick={() => setActiveTab('seasonality')} className={`px-4 py-2 rounded ${activeTab === 'seasonality' ? 'bg-dark-300 text-white' : 'bg-dark-200 text-gray-400'}`}>
+        <button
+          onClick={() => setActiveTab('seasonality')}
+          className={`px-4 py-2 rounded ${activeTab === 'seasonality' ? 'bg-dark-300 text-white' : 'bg-dark-200 text-gray-400'}`}
+        >
           Seasonality
+        </button>
+        <button
+          onClick={() => setActiveTab('cache')}
+          className={`px-4 py-2 rounded ${activeTab === 'cache' ? 'bg-dark-300 text-white' : 'bg-dark-200 text-gray-400'}`}
+        >
+          Cache
         </button>
       </div>
 
@@ -184,7 +198,16 @@ const DataUpdates = () => {
                 <label className="block text-gray-400 text-sm mb-1">Currency</label>
                 <select
                   value={indicatorData.currency}
-                  onChange={(e) => setIndicatorData({ ...indicatorData, currency: e.target.value })}
+                  onChange={(e) => {
+                    const newCurrency = e.target.value;
+                    // Reset indicator to first available
+                    const newIndicators = getIndicatorsForCurrency(newCurrency);
+                    setIndicatorData({
+                      ...indicatorData,
+                      currency: newCurrency,
+                      indicator: newIndicators.length > 0 ? newIndicators[0] : '',
+                    });
+                  }}
                   className="w-full bg-dark-300 border border-dark-400 rounded px-3 py-2 text-white"
                 >
                   <option value="USD">USD</option>
@@ -199,13 +222,15 @@ const DataUpdates = () => {
               </div>
               <div>
                 <label className="block text-gray-400 text-sm mb-1">Indicator</label>
-                <input
-                  type="text"
+                <select
                   value={indicatorData.indicator}
                   onChange={(e) => setIndicatorData({ ...indicatorData, indicator: e.target.value })}
                   className="w-full bg-dark-300 border border-dark-400 rounded px-3 py-2 text-white"
-                  placeholder="e.g., GDP, CPI YoY"
-                />
+                >
+                  {availableIndicators.map((ind) => (
+                    <option key={ind} value={ind}>{ind}</option>
+                  ))}
+                </select>
               </div>
               <div>
                 <label className="block text-gray-400 text-sm mb-1">Actual</label>
@@ -442,23 +467,19 @@ const DataUpdates = () => {
           </form>
         )}
 
-        {/* Put-Call Tab */}
-        {activeTab === 'putcall' && (
+        {/* Seasonality Tab */}
+        {activeTab === 'seasonality' && (
           <div>
-            <h3 className="text-lg font-semibold mb-4">Refresh Put-Call Ratios</h3>
-            <p className="text-gray-400 mb-4">Fetch the latest put/call ratios for all tracked assets from Barchart.</p>
+            <h3 className="text-lg font-semibold mb-4">Refresh Seasonality Data</h3>
+            <p className="text-gray-400 mb-4">
+              This will fetch fresh seasonality data from Yahoo Finance for all pairs and update the database.
+            </p>
             <button
-              onClick={() => refreshPutCall.mutate()}
-              disabled={isRefreshing}
-              className="bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded transition disabled:opacity-50 flex items-center gap-2"
+              onClick={() => refreshSeasonality.mutate()}
+              className="bg-green-600 hover:bg-green-700 text-white font-bold py-2 px-4 rounded transition"
+              disabled={refreshSeasonality.isPending}
             >
-              {isRefreshing ? (
-                <>
-                  <span className="animate-spin">⏳</span> Refreshing...
-                </>
-              ) : (
-                '🔄 Refresh Put-Call Ratios'
-              )}
+              {refreshSeasonality.isPending ? 'Refreshing...' : 'Refresh Seasonality'}
             </button>
           </div>
         )}
@@ -467,42 +488,16 @@ const DataUpdates = () => {
         {activeTab === 'cache' && (
           <div>
             <h3 className="text-lg font-semibold mb-4">Cache Management</h3>
-            <p className="text-gray-400 mb-4">Clear the Django cache and reload all data from the database. This will force a full refresh of all pages.</p>
-            <button
-              onClick={() => clearCacheAndReload.mutate()}
-              disabled={isClearingCache}
-              className="bg-red-600 hover:bg-red-700 text-white font-bold py-2 px-4 rounded transition disabled:opacity-50 flex items-center gap-2"
-            >
-              {isClearingCache ? (
-                <>
-                  <span className="animate-spin">⏳</span> Clearing...
-                </>
-              ) : (
-                '🗑️ Clear Cache & Reload All'
-              )}
-            </button>
-          </div>
-        )}
-
-        {activeTab === 'seasonality' && (
-          <div>
-            <h3 className="text-lg font-semibold mb-4">Refresh Seasonality Data</h3>
             <p className="text-gray-400 mb-4">
-              Fetch 10 years of historical data from Yahoo Finance and update the seasonality tables.
-              This may take a few minutes.
+              Clear the backend cache to force fresh data on the next request.
             </p>
             <button
-              onClick={handleRefreshSeasonality}
-              disabled={isRefreshingSeasonality}
-              className="bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded transition disabled:opacity-50"
+              onClick={() => clearCache.mutate()}
+              className="bg-red-600 hover:bg-red-700 text-white font-bold py-2 px-4 rounded transition"
+              disabled={clearCache.isPending}
             >
-              {isRefreshingSeasonality ? '⏳ Refreshing...' : '🔄 Refresh Seasonality'}
+              {clearCache.isPending ? 'Clearing...' : 'Clear Cache'}
             </button>
-            {seasonalityResult && (
-              <div className="mt-4 p-4 bg-dark-300 rounded">
-                <pre className="text-sm text-gray-300 whitespace-pre-wrap">{seasonalityResult}</pre>
-              </div>
-            )}
           </div>
         )}
       </div>
