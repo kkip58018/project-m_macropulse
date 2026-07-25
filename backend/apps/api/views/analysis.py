@@ -320,15 +320,12 @@ class EconomicHeatmapView(APIView):
         serializer = EconomicHeatmapSerializer(data)
         return Response(serializer.data)
 
-
 class EconomicCalendarView(APIView):
     permission_classes = [IsAuthenticated]
 
     def get(self, request):
         from apps.scrapers.calendar import fetch_forexfactory_calendar
         events = fetch_forexfactory_calendar()
-        if not events:
-            logger.warning("Economic calendar returned empty list")
         serializer = EconomicEventSerializer(events, many=True)
         return Response(serializer.data)
 
