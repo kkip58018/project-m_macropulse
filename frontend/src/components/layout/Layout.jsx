@@ -1,6 +1,7 @@
 import { Outlet } from 'react-router-dom';
 import Sidebar from './Sidebar';
 import Header from './Header';
+import { BarChart3 } from 'lucide-react';
 
 const Layout = () => {
   return (

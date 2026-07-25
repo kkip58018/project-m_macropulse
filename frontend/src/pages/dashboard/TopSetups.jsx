@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { analysis } from '../../api/endpoints';
+import { Trophy } from 'lucide-react';
 
 const INDICATOR_KEYS = [
   'GDP', 'Retail Sales', 'Manufacturing PMI', 'Services PMI',
@@ -90,7 +91,7 @@ const TopSetups = () => {
   return (
     <div>
       <div className="flex items-center justify-between mb-4">
-        <h2 className="text-2xl font-bold text-white">🏆 Top Setups</h2>
+        <h2 className="text-2xl font-bold text-white flex items-center gap-2"><Trophy className="w-6 h-6" /> Top Setups</h2>
         <div className="flex gap-2">
           <input
             type="text"

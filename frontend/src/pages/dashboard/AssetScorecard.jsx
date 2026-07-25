@@ -3,6 +3,7 @@ import { useQuery } from '@tanstack/react-query';
 import { analysis } from '../../api/endpoints';
 import Plot from 'react-plotly.js';
 import SentimentGauge from '../../components/charts/SentimentGauge';
+import { ClipboardList } from 'lucide-react';
 
 const ASSET_OPTIONS = [
   { value: 'USD', label: 'US Dollar' },
@@ -48,7 +49,7 @@ const AssetScorecard = () => {
 
   return (
     <div className="text-white">
-      <h2 className="text-2xl font-bold mb-4">📋 Asset Scorecard</h2>
+      <h2 className="text-2xl font-bold text-white flex items-center gap-2"><ClipboardList className="w-6 h-6" />  Asset Scorecard</h2>
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
         {/* Left column */}

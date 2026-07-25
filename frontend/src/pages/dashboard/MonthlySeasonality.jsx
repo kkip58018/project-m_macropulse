@@ -13,12 +13,18 @@ const ALL_PAIRS = [
   "XAU/USD", "XAG/USD", "BTC/USD", "ETH/USD", "USOIL/USD", "SPX500/USD", "NAS100/USD"
 ];
 
+const getLastCompletedMonthIndex = () => {
+  const now = new Date();
+  const currentMonth = now.getMonth();
+  // Use previous month to avoid showing incomplete data for the current month
+  return currentMonth === 0 ? 11 : currentMonth - 1;
+};
+
 const MonthlySeasonality = () => {
-  const [pair, setPair] = useState('EUR/USD');
+  const [pair, setPair] = useState('AUD/CAD');
   const { data, isLoading, error } = useQuery({
     queryKey: ['monthlySeasonality', pair],
     queryFn: () => analysis.getMonthlySeasonality(pair).then(res => res.data),
-    staleTime: 60 * 60 * 1000,
     enabled: !!pair,
   });
 
@@ -28,31 +34,46 @@ const MonthlySeasonality = () => {
 
   const months = data.map(d => d.month);
   const avgReturns = data.map(d => d.avg_return);
-  const biases = data.map(d => d.bias);
+  const ytdReturns = data.map(d => d.ytd_performance !== undefined ? d.ytd_performance : null);
+
+  // Use last completed month
+  const lastCompletedMonthIdx = getLastCompletedMonthIndex();
+  const lineMonths = months.slice(0, lastCompletedMonthIdx + 1);
+  const lineYtd = ytdReturns.slice(0, lastCompletedMonthIdx + 1);
 
   const barColors = avgReturns.map(v => v >= 0 ? '#1d70b8' : '#b83a1d');
-
-  // Since we have no "current year" line from DB, we'll skip it or use a stub.
-  // For visual parity with original, we can keep the bar chart only.
 
   const chartData = [
     {
       type: 'bar',
       x: months,
       y: avgReturns,
-      name: 'Average Return',
+      name: '10‑Year Average',
       marker: { color: barColors },
       text: avgReturns.map(v => v.toFixed(2) + '%'),
       textposition: 'outside',
       textfont: { color: 'white', size: 10 },
-    }
+    },
+    ...(lineMonths.length > 0 && lineYtd.some(v => v !== null) ? [{
+      type: 'scatter',
+      mode: 'lines+markers',
+      x: lineMonths,
+      y: lineYtd,
+      name: 'This Year (YTD)',
+      line: {
+        color: '#ffffff',
+        width: 2,
+        dash: 'dot',
+        shape: 'spline',
+      },
+      marker: { color: '#ffffff', size: 6 },
+      text: lineYtd.map(v => v !== null ? v.toFixed(2) + '%' : ''),
+      textposition: 'top center',
+      textfont: { color: 'white', size: 9 },
+    }] : []),
   ];
 
   const layout = {
-    title: {
-      text: `Monthly Seasonality – ${pair}`,
-      font: { color: '#ffffff', size: 18 },
-    },
     xaxis: {
       title: '',
       tickangle: 0,
@@ -64,10 +85,18 @@ const MonthlySeasonality = () => {
       gridcolor: 'rgba(128,128,128,0.1)',
       zerolinecolor: 'rgba(128,128,128,0.3)',
     },
+    legend: {
+      orientation: 'h',
+      yanchor: 'bottom',
+      y: 1.02,
+      xanchor: 'right',
+      x: 1,
+      font: { color: '#94a3b8' },
+    },
     paper_bgcolor: 'transparent',
     plot_bgcolor: 'transparent',
-    margin: { l: 50, r: 30, t: 60, b: 40 },
-    height: 720,
+    margin: { l: 50, r: 30, t: 20, b: 40 },
+    height: 750,
     hovermode: 'x unified',
     hoverlabel: {
       bgcolor: '#1e2430',

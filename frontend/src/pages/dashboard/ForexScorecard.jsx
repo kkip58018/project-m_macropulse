@@ -3,6 +3,7 @@ import { useQuery } from '@tanstack/react-query';
 import { analysis } from '../../api/endpoints';
 import Plot from 'react-plotly.js';
 import SentimentGauge from '../../components/charts/SentimentGauge';
+import { BarChart3 } from 'lucide-react';
 
 const FOREX_PAIRS = [
   'AUD/CAD', 'AUD/CHF', 'AUD/JPY', 'AUD/NZD', 'AUD/USD',
@@ -42,7 +43,7 @@ const ForexScorecard = () => {
 
   return (
     <div className="text-white">
-      <h2 className="text-2xl font-bold mb-2">📊 Forex Scorecard</h2>
+      <h2 className="text-2xl font-bold text-white flex items-center gap-2"><BarChart3 className="w-6 h-6" /> Forex Scorecard</h2>
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
         {/* Left column */}
