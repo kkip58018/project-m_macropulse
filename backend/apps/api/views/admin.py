@@ -269,8 +269,8 @@ class RefreshCOTView(APIView):
     
     def post(self, request):
         try:
-            cache.clear()
             updated = analyzer.cot.refresh_from_web()
+            cache.clear()
             return Response({
                 'message': f'COT data refreshed successfully',
                 'updated': updated
