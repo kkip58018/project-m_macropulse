@@ -1,5 +1,6 @@
 import { useQuery } from '@tanstack/react-query';
 import { analysis } from '../../api/endpoints';
+import { Globe } from 'lucide-react'
 
 const EconomicStrength = () => {
   const { data, isLoading, error } = useQuery({
@@ -14,7 +15,7 @@ const EconomicStrength = () => {
   return (
     <div>
       <div className="flex items-center gap-2 mb-4">
-        <h2 className="text-2xl font-bold text-white">🌍 Economic Strength Index</h2>
+        <h2 className="text-2xl font-bold mb-2 text-white flex items-center gap-2"><Globe className="w-6 h-6" />  Economic Strength Index</h2>
         <div className="relative group cursor-help">
           <span className="inline-flex items-center justify-center w-5 h-5 text-xs font-bold text-gray-400 border border-dark-400 rounded-full hover:border-dark-300 transition-colors">ℹ️</span>
           <div className="absolute left-0 top-8 w-80 bg-dark-200 border border-dark-300 rounded-lg p-3 text-xs text-gray-300 z-10 hidden group-hover:block">

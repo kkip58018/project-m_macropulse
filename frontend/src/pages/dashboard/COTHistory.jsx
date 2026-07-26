@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { analysis } from '../../api/endpoints';
 import Plot from 'react-plotly.js';
+import { PieChart } from 'lucide-react';
 
 const COTHistory = () => {
   const [selectedAsset, setSelectedAsset] = useState('USD');
@@ -43,7 +44,7 @@ const COTHistory = () => {
 
   return (
     <div>
-      <h2 className="text-2xl font-bold text-white mb-4">📊 COT Data History</h2>
+      <h2  className="text-2xl font-bold mb-2 text-white flex items-center gap-2"> <PieChart className="w-6 h-6" /> COT Data History</h2>
 
       <div className="mb-4">
         <select

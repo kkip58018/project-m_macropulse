@@ -1,5 +1,6 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import api from '../../api/client';
+import { UserCog,RefreshCw,FileUser,CirclePause } from 'lucide-react';
 
 const UserApprovals = () => {
   const queryClient = useQueryClient();
@@ -56,11 +57,11 @@ const UserApprovals = () => {
 
   return (
     <div className="text-white">
-      <h2 className="text-2xl font-bold mb-4">👥 User Approvals</h2>
+      <h2 className="text-2xl font-bold mb-2 text-white flex items-center gap-2"><UserCog className="w-6 h-6" />  User Approvals</h2>
 
       {/* Pending Approval */}
       <div className="bg-dark-200 p-4 rounded-lg border border-dark-300 mb-6">
-        <h3 className="text-lg font-semibold mb-3 text-yellow-400">⏳ Pending Approval</h3>
+        <h3 className="text-2xl font-bold mb-2 text-white flex items-center gap-2"><RefreshCw className="w-6 h-6" />  Pending Approval</h3>
         {pending && pending.length > 0 ? (
           <div className="space-y-2">
             {pending.map((user) => (
@@ -68,7 +69,7 @@ const UserApprovals = () => {
                 <div>
                   <span className="text-white">{user.email}</span>
                   <span className="text-gray-400 text-sm ml-4">
-                    Joined: {new Date(user.created_at).toLocaleDateString()}
+                    Joined: {new Date(user.created_at).toLocaleDateString()}       
                   </span>
                 </div>
                 <div className="flex gap-2">
@@ -97,7 +98,7 @@ const UserApprovals = () => {
 
       {/* Active Users (Approved & Not Paused) */}
       <div className="bg-dark-200 p-4 rounded-lg border border-dark-300 mb-6">
-        <h3 className="text-lg font-semibold mb-3 text-green-400">✅ Active Users</h3>
+        <h3 className="text-lg font-semibold mb-3 text-green-400 flex items-center gap-2"><FileUser className="w-6 h-6" />  Active Users</h3> 
         {activeUsers && activeUsers.length > 0 ? (
           <div className="space-y-2">
             {activeUsers.map((user) => (
@@ -137,7 +138,7 @@ const UserApprovals = () => {
 
       {/* Paused Users */}
       <div className="bg-dark-200 p-4 rounded-lg border border-dark-300">
-        <h3 className="text-lg font-semibold mb-3 text-gray-400">⏸️ Paused Users</h3>
+        <h3 className="text-lg font-semibold mb-3 text-gray-400 flex items-center gap-2"><CirclePause  className="w-6 h-6" /> Paused Users</h3>
         {pausedUsers && pausedUsers.length > 0 ? (
           <div className="space-y-2">
             {pausedUsers.map((user) => (
@@ -179,3 +180,4 @@ const UserApprovals = () => {
 };
 
 export default UserApprovals;
+

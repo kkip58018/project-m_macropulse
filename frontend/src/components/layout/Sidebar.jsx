@@ -14,7 +14,7 @@ import {
   RefreshCw,
   Settings,
   UserCog,
-  Activity,
+  ChartArea,
   DollarSign,
   PieChart,
   Gauge,
@@ -37,7 +37,7 @@ const Sidebar = () => {
     { to: '/annual-seasonality', icon: LineChart, label: 'Annual Seasonality' },
     { to: '/economic-heatmap', icon: Flame, label: 'Economic Heatmap' },
     { to: '/retail-sentiment', icon: Users, label: 'Retail Sentiment' },
-    { to: '/put-call', icon: Activity, label: 'Put-Call Ratio' },
+    { to: '/put-call', icon: ChartArea, label: 'Put-Call Ratio' },
     { to: '/economic-calendar', icon: Calendar, label: 'Economic Calendar' },
   ];
 

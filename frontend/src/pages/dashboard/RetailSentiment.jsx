@@ -3,6 +3,7 @@ import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { analysis } from '../../api/endpoints';
 import api from '../../api/client';
 import { useAuth } from '../../context/AuthContext';
+import { Users } from 'lucide-react';
 
 const CRYPTO_PAIRS = ['BTC/USD', 'ETH/USD'];
 const METAL_PAIRS = ['XAU/USD', 'XAG/USD'];
@@ -63,7 +64,7 @@ const RetailSentiment = () => {
     <div>
       {/* Title row with refresh button (admin only) */}
       <div className="flex items-center justify-between mb-4">
-        <h2 className="text-2xl font-bold text-white">🔄 Retail Sentiment</h2>
+        <h2 className="text-2xl font-bold mb-2 text-white flex items-center gap-2"><Users className="w-6 h-6" /> Retail Sentiment</h2>
         <div className="flex items-center gap-2">
           {isAdmin && (
             <button

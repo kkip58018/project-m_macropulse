@@ -1,6 +1,7 @@
 import { useQuery } from '@tanstack/react-query';
 import { analysis } from '../../api/endpoints';
 import EcoSurpriseGauge from '../../components/charts/EcoSurpriseGauge';
+import { TrendingUp } from 'lucide-react'
 
 const EcoSurprise = () => {
   const { data, isLoading, error } = useQuery({
@@ -14,7 +15,7 @@ const EcoSurprise = () => {
 
   return (
     <div>
-      <h2 className="text-2xl font-bold text-white mb-4">📈 Eco Surprise Index</h2>
+      <h2 className="text-2xl font-bold mb-2 text-white flex items-center gap-2"><TrendingUp className="w-6 h-6" />  Eco Surprise Index</h2>
       <p className="text-gray-400 mb-6">
         Bullish percentage – proportion of economic indicators that beat forecasts.
       </p>

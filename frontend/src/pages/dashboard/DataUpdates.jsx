@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import api from '../../api/client';
+import { RefreshCw } from 'lucide-react';
 
 // Indicator definitions (mirroring backend constants)
 const CORE_INDICATORS = [
@@ -166,7 +167,7 @@ const DataUpdates = () => {
 
   return (
     <div className="text-white">
-      <h2 className="text-2xl font-bold mb-4">✏️ Data Updates</h2>
+      <h2 className="text-2xl font-bold mb-2 text-white flex items-center gap-2"><RefreshCw className="w-6 h-6" /> Data Updates</h2>
 
       <div className="flex gap-2 mb-4 flex-wrap">
         <button

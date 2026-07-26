@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { analysis } from '../../api/endpoints';
 import Plot from 'react-plotly.js';
+import { Calendar } from 'lucide-react';
 
 const ALL_PAIRS = [
   "AUD/CAD", "AUD/CHF", "AUD/JPY", "AUD/NZD", "AUD/USD",
@@ -108,7 +109,7 @@ const MonthlySeasonality = () => {
   return (
     <div>
       <div className="flex items-center justify-between mb-4">
-        <h2 className="text-2xl font-bold text-white">📅 Monthly Seasonality</h2>
+        <h2 className="text-2xl font-bold mb-2 text-white flex items-center gap-2"><Calendar className="w-6 h-6" />  Monthly Seasonality</h2>
         <select
           value={pair}
           onChange={(e) => setPair(e.target.value)}

@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { analysis } from '../../api/endpoints';
 import Plot from 'react-plotly.js';
+import { LineChart } from 'lucide-react';
 
 const ALL_PAIRS = [
   "AUD/CAD", "AUD/CHF", "AUD/JPY", "AUD/NZD", "AUD/USD",
@@ -118,7 +119,7 @@ const AnnualSeasonality = () => {
   return (
     <div>
       <div className="flex items-center justify-between mb-4">
-        <h2 className="text-2xl font-bold text-white">📈 Annual Seasonality</h2>
+        <h2 className="text-2xl font-bold mb-2 text-white flex items-center gap-2"><LineChart className="w-6 h-6" /> Annual Seasonality</h2>
         <select
           value={pair}
           onChange={(e) => setPair(e.target.value)}

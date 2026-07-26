@@ -4,7 +4,7 @@ import api from '../../api/client';
 import Plot from 'react-plotly.js';
 import { useAuth } from '../../context/AuthContext';
 import { useState } from 'react';
-import { ClipboardList } from 'lucide-react';
+import { FileText,CalendarRange  } from 'lucide-react';
 
 const LatestCOT = () => {
   const { isAdmin } = useAuth();
@@ -98,10 +98,10 @@ const LatestCOT = () => {
       {/* Title row with date and refresh button */}
       <div className="flex items-center justify-between mb-4">
         <div className="flex items-center gap-4">
-          <h2 className="text-2xl font-bold text-white flex items-center gap-2"><ClipboardList className="w-6 h-6" />Latest COT Report</h2>
+          <h2 className="text-2xl font-bold text-white flex items-center gap-2"><FileText className="w-6 h-6" />Latest COT Report</h2>
           {latest_date && (
-            <span className="text-gray-400 text-sm">
-              📅 last updated: {latest_date}
+            <span className="text-gray-400 text-sm flex items-center gap-2">
+              <CalendarRange className="w-6 h-6" /> last updated: {latest_date}
             </span>
           )}
         </div>

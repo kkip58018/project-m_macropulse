@@ -5,6 +5,7 @@ import api from '../../api/client';
 import Gauge from '../../components/charts/Gauge';
 import DataTable from '../../components/tables/DataTable';
 import { useAuth } from '../../context/AuthContext';
+import { Flame } from 'lucide-react'
 
 const CURRENCIES = ['USD', 'EUR', 'GBP', 'JPY', 'AUD', 'CAD', 'CHF', 'NZD'];
 
@@ -125,7 +126,7 @@ const EconomicHeatmap = () => {
 
       {/* Title row with refresh button (admin only) */}
       <div className="flex items-center justify-between mb-2">
-        <h2 className="text-2xl font-bold text-white">🔥 Economic Heatmap</h2>
+        <h2 className="text-2xl font-bold mb-2 text-white flex items-center gap-2"><Flame className="w-6 h-6" /> Economic Heatmap</h2>
         {isAdmin && (
           <button
             onClick={handleRefresh}

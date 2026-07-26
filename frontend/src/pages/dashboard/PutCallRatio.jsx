@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { analysis } from '../../api/endpoints';
 import Plot from 'react-plotly.js';
+import { ChartArea } from 'lucide-react'
 
 const ASSET_CONFIG = {
   'Bitcoin': { ticker: 'IBIT', highPut: 1.4, highCall: 0.6, yMin: 0.1, yMax: 2.8 },
@@ -104,7 +105,7 @@ const PutCallRatio = () => {
   return (
     <div>
       <div className="flex items-center justify-between mb-4">
-        <h2 className="text-2xl font-bold text-white">📊 Put-Call Ratio</h2>
+        <h2 className="text-2xl font-bold mb-2 text-white flex items-center gap-2"><ChartArea className="w-6 h-6" />Put-Call Ratio</h2>
         <select
           value={selectedAsset}
           onChange={(e) => setSelectedAsset(e.target.value)}
