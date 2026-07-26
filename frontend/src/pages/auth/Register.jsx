@@ -1,7 +1,7 @@
-// frontend/src/pages/auth/Register.jsx
 import React, { useState } from 'react';
 import { useAuth } from '../../context/AuthContext';
 import { Link, useNavigate } from 'react-router-dom';
+import { Home } from 'lucide-react';
 
 const Register = () => {
   const [email, setEmail] = useState('');
@@ -25,8 +25,6 @@ const Register = () => {
     try {
       await signUp(email, password);
       setSuccess(true);
-      // After sign-up, user must wait for admin approval
-      // We can redirect to login or show a message
       setTimeout(() => navigate('/login'), 3000);
     } catch (err) {
       setError(err.message || 'Failed to sign up');
@@ -34,8 +32,19 @@ const Register = () => {
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-dark-100">
+    <div className="min-h-screen bg-dark-100 flex items-center justify-center p-4">
       <div className="bg-dark-200 p-8 rounded-2xl border border-dark-300 w-full max-w-md">
+        <div className="flex justify-between items-center mb-6">
+          <button
+            onClick={() => navigate('/')}
+            className="flex items-center gap-1 text-gray-400 hover:text-white transition text-sm"
+          >
+            <Home className="w-4 h-4" />
+            <span>Home</span>
+          </button>
+          <div className="text-xl font-bold text-green-400">MacroPulse</div>
+        </div>
+
         <h2 className="text-2xl font-bold text-white text-center mb-6">Create Account</h2>
 
         {error && (

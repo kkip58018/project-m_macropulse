@@ -1,5 +1,6 @@
 from django.urls import path
 from .views.auth import UserInfoView
+from .views.public import PublicRetailSentimentView, PublicLatestCOTView
 from .views.analysis import (
     COTTrendsView,
     PutCallRatioView,
@@ -63,6 +64,9 @@ urlpatterns = [
     path('analysis/economic-heatmap/', EconomicHeatmapView.as_view(), name='economic_heatmap'),
     path('analysis/economic-calendar/', EconomicCalendarView.as_view(), name='economic_calendar'),
     path('health/', health_check, name='health'),
+    # public
+    path('public/retail-sentiment/', PublicRetailSentimentView.as_view(), name='public_retail'),
+    path('public/cot-latest/', PublicLatestCOTView.as_view(), name='public_cot'),
 ]
 
 urlpatterns += [

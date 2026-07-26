@@ -1,19 +1,14 @@
-import { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import { useAuth } from '../../context/AuthContext';
 import { Link, useNavigate } from 'react-router-dom';
+import { Home } from 'lucide-react';
 
 const Login = () => {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
-  const { signIn, authError } = useAuth();
+  const { signIn } = useAuth();
   const navigate = useNavigate();
-
-  useEffect(() => {
-    if (authError) {
-      setError(authError);
-    }
-  }, [authError]);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -27,14 +22,22 @@ const Login = () => {
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-dark-100">
+    <div className="min-h-screen bg-dark-100 flex items-center justify-center p-4">
       <div className="bg-dark-200 p-8 rounded-2xl border border-dark-300 w-full max-w-md">
+        {/* Home button */}
+        <div className="flex justify-between items-center mb-6">
+          <button
+            onClick={() => navigate('/')}
+            className="flex items-center gap-1 text-gray-400 hover:text-white transition text-sm"
+          >
+            <Home className="w-4 h-4" />
+            <span>Home</span>
+          </button>
+          <div className="text-xl font-bold text-green-400">MacroPulse</div>
+        </div>
+
         <h2 className="text-2xl font-bold text-white text-center mb-6">Sign In</h2>
-        {error && (
-          <div className="bg-red-500/20 text-red-400 p-3 rounded mb-4 border border-red-500/30">
-            {error}
-          </div>
-        )}
+        {error && <div className="bg-red-500/20 text-red-400 p-3 rounded mb-4">{error}</div>}
         <form onSubmit={handleSubmit}>
           <div className="mb-4">
             <label className="block text-gray-400 mb-2">Email</label>

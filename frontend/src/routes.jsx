@@ -23,12 +23,27 @@ import EconomicCalendar from './pages/dashboard/EconomicCalendar';
 import DataUpdates from './pages/dashboard/DataUpdates';
 import TrendSettings from './pages/dashboard/TrendSettings';
 import UserApprovals from './pages/dashboard/UserApprovals';
+import FreeRetailSentiment from './pages/FreeRetailSentiment';
+import FreeLatestCOT from './pages/FreeLatestCOT';
+import PositionSizeCalculator from './pages/PositionSizeCalculator';
 
 const router = createBrowserRouter([
    {
     path: '/',
     element: 
         <Landing />
+  },
+  {
+  path: '/free-retail-sentiment',
+  element: <FreeRetailSentiment />,
+  },
+  {
+    path: '/free-latest-cot',
+    element: <FreeLatestCOT />,
+  },
+  {
+    path: '/free-position-size-calculator',
+    element: <PositionSizeCalculator />,
   },
   {
     path: '/login',

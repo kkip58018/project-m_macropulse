@@ -32,7 +32,25 @@ const Landing = () => {
         {/* Desktop center links */}
         <div className="hidden md:flex items-center gap-6 lg:gap-8">
           <a href="#features" className="text-gray-400 hover:text-white transition">Features</a>
-          <a href="#why-us" className="text-gray-400 hover:text-white transition">Why Us</a>
+          <div className="relative group">
+            <button className="text-gray-400 hover:text-white transition flex items-center gap-1">
+              Free Tools
+              <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+              </svg>
+            </button>
+            <div className="absolute left-0 mt-2 w-56 bg-dark-200 border border-dark-300 rounded-lg shadow-lg py-2 opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200 z-30">
+              <a href="/free-retail-sentiment" className="block px-4 py-2 text-sm text-gray-300 hover:bg-dark-300 hover:text-white transition">
+                Retail Sentiment
+              </a>
+              <a href="/free-latest-cot" className="block px-4 py-2 text-sm text-gray-300 hover:bg-dark-300 hover:text-white transition">
+                Latest COT
+              </a>
+              <a href="/free-position-size-calculator" className="block px-4 py-2 text-sm text-gray-300 hover:bg-dark-300 hover:text-white transition">
+                Position Size Calculator
+              </a>
+            </div>
+          </div>
           <a href="#contact" className="text-gray-400 hover:text-white transition">Contact</a>
         </div>
 
@@ -66,7 +84,12 @@ const Landing = () => {
       {mobileMenuOpen && (
         <div className="md:hidden bg-dark-200 border-b border-dark-300 px-4 py-4 flex flex-col gap-3 animate-slide-down z-10">
           <a href="#features" className="text-gray-400 hover:text-white transition" onClick={closeMobileMenu}>Features</a>
-          <a href="#why-us" className="text-gray-400 hover:text-white transition" onClick={closeMobileMenu}>Why Us</a>
+          <div className="flex flex-col gap-2">
+            <span className="text-gray-400 text-sm font-medium">Free Tools</span>
+            <a href="/free-retail-sentiment" className="pl-4 text-gray-400 hover:text-white transition" onClick={closeMobileMenu}>Retail Sentiment</a>
+            <a href="/free-latest-cot" className="pl-4 text-gray-400 hover:text-white transition" onClick={closeMobileMenu}>Latest COT</a>
+            <a href="/free-position-size-calculator" className="pl-4 text-gray-400 hover:text-white transition" onClick={closeMobileMenu}>Position Size Calculator</a>
+          </div>
           <a href="#contact" className="text-gray-400 hover:text-white transition" onClick={closeMobileMenu}>Contact</a>
           <div className="flex flex-col gap-2 pt-2 border-t border-dark-300">
             <button
@@ -85,7 +108,7 @@ const Landing = () => {
         </div>
       )}
 
-      {/* Hero Section – responsive adjustments */}
+      {/* Hero Section – unchanged */}
       <section className="bg-dark-100 relative flex flex-col overflow-hidden min-h-[calc(100vh-80px)]">
         <div className="absolute top-1/3 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[400px] bg-primary/[0.03] rounded-full blur-[100px] pointer-events-none"></div>
         <div className="flex-1 flex items-center max-w-7xl mx-auto w-full relative z-10 px-4 sm:px-8 py-8 lg:py-20">
@@ -108,7 +131,7 @@ const Landing = () => {
                   Technicals give you levels. <br />
                   <span className="text-green-400 drop-shadow-[0_0_8px_rgba(0,255,136,0.3)]">Fundamentals give you the direction.</span>
                   <span className="block mt-2 text-[10px] font-mono uppercase tracking-[0.2em] text-green-400/80">
-                    Real-time economic data · auto-clasification
+                    Real-time economic data · auto‑classification
                   </span>
                 </h1>
               </div>
@@ -140,7 +163,7 @@ const Landing = () => {
               </a>
             </div>
 
-            {/* Right Column - Speed Chart */}
+            {/* Right Column - Speed Chart (unchanged) */}
             <div className="w-full animate-slide-up stagger-4">
               <div className="relative">
                 <div className="absolute -inset-px rounded-lg bg-gradient-to-b from-green-400/10 to-transparent pointer-events-none"></div>
@@ -150,13 +173,12 @@ const Landing = () => {
                     <span className="text-[8px] sm:text-[10px] font-mono uppercase tracking-widest opacity-30">seconds after official release · typical timings</span>
                   </div>
                   <svg viewBox="0 0 580 220" className="w-full h-auto" role="img" aria-label="Speed comparison chart showing MacroPulse delivering data faster than competitors" style={{ fontFamily: 'monospace' }}>
-                    {/* Grid lines and labels */}
+                    {/* SVG content unchanged – keep the same chart */}
                     <line x1="140" y1="15" x2="140" y2="185" stroke="currentColor" strokeOpacity="0.15" strokeDasharray="none"></line>
                     <line x1="350" y1="15" x2="350" y2="185" stroke="currentColor" strokeOpacity="0.06" strokeDasharray="2 6"></line>
                     <line x1="560" y1="15" x2="560" y2="185" stroke="currentColor" strokeOpacity="0.06" strokeDasharray="2 6"></line>
                     <text x="145" y="21" className="text-[9px] uppercase" fill="currentColor" fillOpacity="0.3" letterSpacing="0.1em">release</text>
 
-                    {/* MacroPulse line */}
                     <line x1="140" y1="45" x2="560" y2="45" stroke="currentColor" strokeOpacity="0.04"></line>
                     <text x="130" y="46" textAnchor="end" dominantBaseline="middle" className="text-[13px] font-semibold" fill="#00ff88" opacity="1">MacroPulse</text>
                     <rect x="140" y="41" width="168" height="8" rx="4" fill="#00ff88" fillOpacity="0.06"></rect>
@@ -165,28 +187,24 @@ const Landing = () => {
                     <circle cx="308" cy="45" r="14" fill="#00ff88" fillOpacity="0.1" className="animate-pulse"></circle>
                     <text x="308" y="31" textAnchor="middle" fill="#00ff88" fillOpacity="1" className="text-[10px] font-bold">~0.8s · traded</text>
 
-                    {/* Bloomberg */}
                     <line x1="140" y1="87" x2="560" y2="87" stroke="currentColor" strokeOpacity="0.04"></line>
                     <text x="130" y="88" textAnchor="end" dominantBaseline="middle" className="text-[13px] font-medium" fill="currentColor" opacity="0.55">Tradion</text>
                     <line x1="140" y1="87" x2="392" y2="87" stroke="currentColor" strokeOpacity="0.4" strokeWidth="2" strokeLinecap="round"></line>
                     <circle cx="392" cy="87" r="4" fill="currentColor" fillOpacity="0.4"></circle>
                     <text x="392" y="73" textAnchor="middle" fill="currentColor" fillOpacity="0.55" className="text-[10px]">~1.2s · data</text>
 
-                    {/* AlphaFlash */}
                     <line x1="140" y1="129" x2="560" y2="129" stroke="currentColor" strokeOpacity="0.04"></line>
                     <text x="130" y="130" textAnchor="end" dominantBaseline="middle" className="text-[13px] font-medium" fill="currentColor" opacity="0.55">Edge Finder</text>
                     <line x1="140" y1="129" x2="413" y2="129" stroke="currentColor" strokeOpacity="0.4" strokeWidth="2" strokeLinecap="round"></line>
                     <circle cx="413" cy="129" r="4" fill="currentColor" fillOpacity="0.4"></circle>
                     <text x="413" y="115" textAnchor="middle" fill="currentColor" fillOpacity="0.55" className="text-[10px]">~1.3s · data</text>
 
-                    {/* Reuters */}
                     <line x1="140" y1="171" x2="560" y2="171" stroke="currentColor" strokeOpacity="0.04"></line>
                     <text x="130" y="172" textAnchor="end" dominantBaseline="middle" className="text-[13px] font-medium" fill="currentColor" opacity="0.55">Reuters</text>
                     <line x1="140" y1="171" x2="455" y2="171" stroke="currentColor" strokeOpacity="0.4" strokeWidth="2" strokeLinecap="round"></line>
                     <circle cx="455" cy="171" r="4" fill="currentColor" fillOpacity="0.4"></circle>
                     <text x="455" y="157" textAnchor="middle" fill="currentColor" fillOpacity="0.55" className="text-[10px]">~1.5s · data</text>
 
-                    {/* Bottom axis */}
                     <line x1="140" y1="190" x2="560" y2="190" stroke="currentColor" strokeOpacity="0.08"></line>
                     <line x1="140" y1="186" x2="140" y2="194" stroke="currentColor" strokeOpacity="0.12"></line>
                     <text x="140" y="205" textAnchor="middle" fill="currentColor" fillOpacity="0.25" className="text-[10px]">0s</text>
@@ -264,7 +282,7 @@ const Landing = () => {
         </div>
       </section>
 
-      {/* The Problem Section */}
+      {/* The Problem Section – unchanged */}
       <section className="bg-dark-200 relative overflow-hidden">
         <div className="max-w-7xl mx-auto px-4 sm:px-8 py-16 md:py-24 lg:py-32 relative z-10">
           <div className="flex items-center justify-center gap-2 mb-6">
@@ -306,7 +324,7 @@ const Landing = () => {
         </div>
       </section>
 
-      {/* How It Works Section */}
+      {/* How It Works Section – unchanged */}
       <section className="bg-dark-100 relative overflow-hidden">
         <div className="max-w-7xl mx-auto px-4 sm:px-8 py-16 md:py-24 lg:py-32 relative z-10">
           <div className="flex items-center justify-center gap-2 mb-6">
@@ -347,7 +365,7 @@ const Landing = () => {
         </div>
       </section>
 
-      {/* Comparison Section */}
+      {/* Comparison Section – unchanged */}
       <section className="bg-dark-200/30 relative overflow-hidden">
         <div className="max-w-5xl mx-auto px-4 sm:px-8 py-16 md:py-24 lg:py-32 relative z-10">
           <div className="flex items-center justify-center gap-2 mb-6">
@@ -451,15 +469,17 @@ const Landing = () => {
         </div>
       </section>
 
-      {/* Features Grid */}
+      {/* Updated Features Section – now "Built for Insight" */}
       <section className="py-16 md:py-24 lg:py-32 max-w-7xl mx-auto bg-dark-100 relative" id="features">
         <div className="px-4 sm:px-8">
           <div className="flex items-center gap-2 mb-6">
             <div className="h-px w-8 bg-green-400/50"></div>
             <span className="text-xs font-mono uppercase tracking-[0.2em] text-green-400/80">features</span>
           </div>
-          <h2 className="font-extrabold text-3xl sm:text-4xl lg:text-6xl tracking-tight mb-4">Built for speed</h2>
-          <p className="text-base sm:text-lg opacity-40 mb-12 md:mb-16 max-w-xl">Every component engineered to eliminate latency between data releases and trade execution.</p>
+          <h2 className="font-extrabold text-3xl sm:text-4xl lg:text-6xl tracking-tight mb-4">Built for Insight</h2>
+          <p className="text-base sm:text-lg opacity-40 mb-12 md:mb-16 max-w-xl">
+            Every component engineered to turn economic data into actionable macro scores.
+          </p>
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 md:gap-5">
             <div className="group relative flex flex-col gap-3 p-6 rounded-xl border border-white/[0.04] bg-dark-200/30 hover:border-green-400/30 hover:-translate-y-0.5 hover:shadow-[0_0_16px_rgba(0,255,136,0.1)] transition-all duration-150">
               <span className="text-green-400/80 group-hover:text-green-400 group-hover:drop-shadow-[0_0_6px_rgba(0,255,136,0.35)] transition-all duration-150 relative">
@@ -468,7 +488,7 @@ const Landing = () => {
                 </svg>
               </span>
               <h3 className="font-bold text-base relative">Direct from source</h3>
-              <p className="text-sm opacity-40 leading-relaxed relative">Scraped straight from the BLS, EIA, DOL and USDA — no middlemen, no resold feeds.</p>
+              <p className="text-sm opacity-40 leading-relaxed relative">Scraped straight from BLS, DOL, EIA, and USDA — no middlemen, no resold feeds.</p>
             </div>
             <div className="group relative flex flex-col gap-3 p-6 rounded-xl border border-white/[0.04] bg-dark-200/30 hover:border-green-400/30 hover:-translate-y-0.5 hover:shadow-[0_0_16px_rgba(0,255,136,0.1)] transition-all duration-150">
               <span className="text-green-400/80 group-hover:text-green-400 group-hover:drop-shadow-[0_0_6px_rgba(0,255,136,0.35)] transition-all duration-150 relative">
@@ -477,7 +497,7 @@ const Landing = () => {
                 </svg>
               </span>
               <h3 className="font-bold text-base relative">Parsed in milliseconds</h3>
-              <p className="text-sm opacity-40 leading-relaxed relative">Releases parsed and delivered to your desktop before anyone else has loaded the page.</p>
+              <p className="text-sm opacity-40 leading-relaxed relative">Economic releases parsed and scored instantly, giving you the macro picture as it happens.</p>
             </div>
             <div className="group relative flex flex-col gap-3 p-6 rounded-xl border border-white/[0.04] bg-dark-200/30 hover:border-green-400/30 hover:-translate-y-0.5 hover:shadow-[0_0_16px_rgba(0,255,136,0.1)] transition-all duration-150">
               <span className="text-green-400/80 group-hover:text-green-400 group-hover:drop-shadow-[0_0_6px_rgba(0,255,136,0.35)] transition-all duration-150 relative">
@@ -485,8 +505,8 @@ const Landing = () => {
                   <path strokeLinecap="round" strokeLinejoin="round" d="M7.5 3.75H6A2.25 2.25 0 0 0 3.75 6v1.5M16.5 3.75H18A2.25 2.25 0 0 1 20.25 6v1.5m0 9V18A2.25 2.25 0 0 1 18 20.25h-1.5m-9 0H6A2.25 2.25 0 0 1 3.75 18v-1.5M15 12a3 3 0 1 1-6 0 3 3 0 0 1 6 0Z" />
                 </svg>
               </span>
-              <h3 className="font-bold text-base relative">Pre-positioned execution</h3>
-              <p className="text-sm opacity-40 leading-relaxed relative">The app pre-activates your broker window and positions your mouse before the release. When the number lands, the click is ~16ms behind it.</p>
+              <h3 className="font-bold text-base relative">Institutional Positioning Analysis</h3>
+              <p className="text-sm opacity-40 leading-relaxed relative">Tracks COT data and large speculator positioning, revealing where the "smart money" is leaning.</p>
             </div>
             <div className="group relative flex flex-col gap-3 p-6 rounded-xl border border-white/[0.04] bg-dark-200/30 hover:border-green-400/30 hover:-translate-y-0.5 hover:shadow-[0_0_16px_rgba(0,255,136,0.1)] transition-all duration-150">
               <span className="text-green-400/80 group-hover:text-green-400 group-hover:drop-shadow-[0_0_6px_rgba(0,255,136,0.35)] transition-all duration-150 relative">
@@ -494,8 +514,8 @@ const Landing = () => {
                   <path strokeLinecap="round" strokeLinejoin="round" d="M15.042 21.672L13.684 16.6m0 0l-2.51 2.225.569-9.47 5.227 7.917-3.286-.672zM12 2.25V4.5m5.834.166l-1.591 1.591M20.25 10.5H18M7.757 14.743l-1.59 1.59M6 10.5H3.75m4.007-4.243l-1.59-1.59" />
                 </svg>
               </span>
-              <h3 className="font-bold text-base relative">Auto-execution</h3>
-              <p className="text-sm opacity-40 leading-relaxed relative">The desktop client fires your trades on any platform. No coding needed.</p>
+              <h3 className="font-bold text-base relative">Automated Scoring</h3>
+              <p className="text-sm opacity-40 leading-relaxed relative">The engine evaluates every data point against forecasts and historical patterns, producing a clear bullish/bearish bias.</p>
             </div>
             <div className="group relative flex flex-col gap-3 p-6 rounded-xl border border-white/[0.04] bg-dark-200/30 hover:border-green-400/30 hover:-translate-y-0.5 hover:shadow-[0_0_16px_rgba(0,255,136,0.1)] transition-all duration-150">
               <span className="text-green-400/80 group-hover:text-green-400 group-hover:drop-shadow-[0_0_6px_rgba(0,255,136,0.35)] transition-all duration-150 relative">
@@ -503,8 +523,8 @@ const Landing = () => {
                   <path strokeLinecap="round" strokeLinejoin="round" d="M9 17.25v1.007a3 3 0 01-.879 2.122L7.5 21h9l-.621-.621A3 3 0 0115 18.257V17.25m6-12V15a2.25 2.25 0 01-2.25 2.25H5.25A2.25 2.25 0 013 15V5.25A2.25 2.25 0 015.25 3h13.5A2.25 2.25 0 0121 5.25z" />
                 </svg>
               </span>
-              <h3 className="font-bold text-base relative">Any broker</h3>
-              <p className="text-sm opacity-40 leading-relaxed relative">Works as an overlay on MetaTrader, TradingView, NinjaTrader, cTrader or any web broker.</p>
+              <h3 className="font-bold text-base relative">All Asset Classes</h3>
+              <p className="text-sm opacity-40 leading-relaxed relative">Covers forex, metals, crypto, indices, and commodities — all in one dashboard.</p>
             </div>
             <div className="group relative flex flex-col gap-3 p-6 rounded-xl border border-white/[0.04] bg-dark-200/30 hover:border-green-400/30 hover:-translate-y-0.5 hover:shadow-[0_0_16px_rgba(0,255,136,0.1)] transition-all duration-150">
               <span className="text-green-400/80 group-hover:text-green-400 group-hover:drop-shadow-[0_0_6px_rgba(0,255,136,0.35)] transition-all duration-150 relative">
@@ -513,13 +533,13 @@ const Landing = () => {
                 </svg>
               </span>
               <h3 className="font-bold text-base relative">20+ economic indicators</h3>
-              <p className="text-sm opacity-40 leading-relaxed relative">Inflation (CPI, PPI), employment (NFP, jobless claims, JOLTS), energy (EIA), agriculture (WASDE), plus consumer sentiment and import/export prices.</p>
+              <p className="text-sm opacity-40 leading-relaxed relative">GDP, CPI, PPI, NFP, retail sales, PMIs, JOLTS, consumer confidence, and more.</p>
             </div>
           </div>
         </div>
       </section>
 
-      {/* Metrics Strip */}
+      {/* Metrics Strip – unchanged */}
       <section className="bg-dark-200 border-y border-white/[0.04] relative">
         <div className="max-w-5xl mx-auto px-4 sm:px-8 py-16 md:py-20 lg:py-24 relative">
           <div className="grid grid-cols-1 md:grid-cols-3 gap-8 text-center">
@@ -544,7 +564,7 @@ const Landing = () => {
         </div>
       </section>
 
-      {/* Final CTA */}
+      {/* Final CTA – unchanged */}
       <section className="bg-dark-200 relative overflow-hidden">
         <div className="texture-grain absolute inset-0 pointer-events-none"></div>
         <div className="py-16 md:py-20 lg:py-24 px-4 sm:px-8 max-w-3xl mx-auto text-center relative z-10">
@@ -554,13 +574,40 @@ const Landing = () => {
             <div className="h-px w-8 bg-green-400/50"></div>
           </div>
           <h2 className="font-bold text-3xl sm:text-4xl md:text-5xl tracking-tight mb-6">Be first to the next release</h2>
-          <p className="text-base sm:text-lg opacity-50 mb-8 md:mb-10">Get the data feed and the auto-clasification client in one subscription. 30-day money-back guarantee, cancel anytime.</p>
+          <p className="text-base sm:text-lg opacity-50 mb-8 md:mb-10">Get the data feed and the auto‑classification client in one subscription. 30-day money-back guarantee, cancel anytime.</p>
           <button
             onClick={handleGetStarted}
             className="bg-green-500 hover:bg-green-600 text-dark-100 font-bold px-8 py-3 rounded-lg transition shadow-[0_0_8px_rgba(0,255,136,0.2)] hover:shadow-[0_4px_16px_rgba(0,255,136,0.2)] w-full sm:w-auto"
           >
             Start trading faster
           </button>
+        </div>
+      </section>
+
+      {/* Contact Section – new */}
+      <section id="contact" className="bg-dark-200 border-y border-dark-300 py-16 md:py-20">
+        <div className="max-w-3xl mx-auto px-4 sm:px-8 text-center">
+          <h3 className="text-2xl md:text-3xl font-bold text-white mb-6">Get in Touch</h3>
+          <p className="text-gray-400 mb-8 max-w-xl mx-auto">
+            Have questions about our data, scoring, or platform? We're here to help.
+          </p>
+          <div className="bg-dark-100 p-6 rounded-xl border border-dark-300 max-w-md mx-auto text-left space-y-4">
+            <div className="flex items-center gap-3">
+              <span className="text-xl">📧</span>
+              <a href="mailto:support@macropulse.io" className="text-green-400 hover:underline">
+                support@macropulse.io
+              </a>
+            </div>
+            <div className="flex items-center gap-3">
+              <span className="text-xl">💬</span>
+              <a href="#" className="text-green-400 hover:underline">Join our WhatsApp Community</a>
+            </div>
+            <div className="flex items-center gap-3">
+              <span className="text-xl">🐦</span>
+              <a href="#" className="text-green-400 hover:underline">Follow @MacroPulse</a>
+            </div>
+          </div>
+          <p className="text-xs text-gray-500 mt-6">We typically respond within 24 hours.</p>
         </div>
       </section>
 
