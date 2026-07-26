@@ -2,7 +2,7 @@ import { useState } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { useNavigate } from 'react-router-dom';
 import api from '../api/client';
-import { BarChart3, Home } from 'lucide-react';
+import { BarChart3, Home, Users } from 'lucide-react';
 
 const CRYPTO_PAIRS = ['BTC/USD', 'ETH/USD'];
 const METAL_PAIRS = ['XAU/USD', 'XAG/USD'];
@@ -22,7 +22,7 @@ const FreeRetailSentiment = () => {
   const { data, isLoading, error } = useQuery({
     queryKey: ['publicRetailSentiment'],
     queryFn: () => api.get('/public/retail-sentiment/').then(res => res.data),
-    staleTime: 5 * 60 * 1000,
+    staleTime: 60 * 60  * 60 * 1000,
   });
 
   if (isLoading) return (
@@ -92,7 +92,7 @@ const FreeRetailSentiment = () => {
 
       <div className="max-w-[104rem] mx-auto p-4">
         <div className="flex items-center justify-between mb-4">
-          <h2 className="text-2xl font-bold text-white">🔄 Retail Sentiment (Free)</h2>
+          <h2 className="text-2xl font-bold text-white flex items-center gap-2"><Users className="w-6 h-6" /> Retail Sentiment</h2>
           <select
             value={filter}
             onChange={(e) => setFilter(e.target.value)}

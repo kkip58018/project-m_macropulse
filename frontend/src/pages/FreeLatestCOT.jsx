@@ -2,14 +2,14 @@ import { useQuery } from '@tanstack/react-query';
 import { useNavigate } from 'react-router-dom';
 import api from '../api/client';
 import Plot from 'react-plotly.js';
-import { BarChart3, Home } from 'lucide-react';
+import { BarChart3, Home, FileText } from 'lucide-react';
 
 const FreeLatestCOT = () => {
   const navigate = useNavigate();
   const { data, isLoading, error } = useQuery({
     queryKey: ['publicLatestCOT'],
     queryFn: () => api.get('/public/cot-latest/').then(res => res.data),
-    staleTime: 5 * 60 * 1000,
+    staleTime: 60 * 60 * 60 * 1000,
   });
 
   if (isLoading) return (
@@ -117,7 +117,7 @@ const FreeLatestCOT = () => {
       </div>
 
       <div className="max-w-[104rem] mx-auto p-4">
-        <h2 className="text-2xl font-bold text-white mb-4">📉 Latest COT Report (Free)</h2>
+        <h2 className="text-2xl font-bold text-white mb-4 flex items-center gap-2"><FileText className="w-6 h-6" />Latest COT Report </h2>
 
         <div className="grid grid-cols-1 lg:grid-cols-9 gap-6">
           <div className="lg:col-span-1 space-y-4 text-sm text-gray-400">

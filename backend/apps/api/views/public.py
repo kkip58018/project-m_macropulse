@@ -2,10 +2,13 @@ from rest_framework.views import APIView
 from rest_framework.response import Response
 from apps.analysis.services import Analyzer
 from apps.api.serializers import RetailSentimentSerializer
-
+from django.views.decorators.cache import cache_page
+from django.utils.decorators import method_decorator
 analyzer = Analyzer()
 
+CACHE_12HOURS = 60 * 60 * 12
 
+@method_decorator(cache_page(CACHE_12HOURS), name='dispatch')
 class PublicRetailSentimentView(APIView):
     permission_classes = []  # No authentication
 
@@ -24,7 +27,7 @@ class PublicRetailSentimentView(APIView):
         serializer = RetailSentimentSerializer(data, many=True)
         return Response(serializer.data)
 
-
+@method_decorator(cache_page(CACHE_12HOURS), name='dispatch')
 class PublicLatestCOTView(APIView):
     permission_classes = []  # No authentication
 
