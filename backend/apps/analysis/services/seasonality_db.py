@@ -213,6 +213,10 @@ class SeasonalityDBService:
             "annual_records": annual_count,
             "errors": errors[:5]  # limit to first 5 for brevity
         }
+    def reload(self):
+        self._load_monthly()
+        self._load_annual()
+    
 
 # Singleton
 seasonality_db = SeasonalityDBService()
