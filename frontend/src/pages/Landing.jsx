@@ -1,10 +1,12 @@
+import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
-import { BarChart3 } from 'lucide-react';
+import { BarChart3, Menu, X } from 'lucide-react';
 
 const Landing = () => {
   const navigate = useNavigate();
   const { user } = useAuth();
+  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
 
   if (user) {
     navigate('/top-setups');
@@ -17,71 +19,111 @@ const Landing = () => {
     navigate('/register');
   };
 
+  const closeMobileMenu = () => setMobileMenuOpen(false);
+
   return (
     <div className="min-h-screen bg-dark-100 text-white flex flex-col">
       {/* Navigation */}
-      <nav className="border-b border-dark-300 py-4 px-6 flex justify-between items-center sticky top-0 bg-dark-100 z-10">
-        <div className="text-2xl font-bold text-green-400 flex items-center gap-2"><BarChart3 className="w-6 h-6" />  MacroPulse</div>
-        <div className="flex items-center gap-8">
+      <nav className="border-b border-dark-300 py-4 px-4 sm:px-6 flex justify-between items-center sticky top-0 bg-dark-100 z-20">
+        <div className="text-xl sm:text-2xl font-bold text-green-400 flex items-center gap-2">
+          <BarChart3 className="w-5 h-5 sm:w-6 sm:h-6" /> MacroPulse
+        </div>
+
+        {/* Desktop center links */}
+        <div className="hidden md:flex items-center gap-6 lg:gap-8">
           <a href="#features" className="text-gray-400 hover:text-white transition">Features</a>
           <a href="#why-us" className="text-gray-400 hover:text-white transition">Why Us</a>
           <a href="#contact" className="text-gray-400 hover:text-white transition">Contact</a>
         </div>
-        <div className="flex items-center gap-3">
+
+        {/* Desktop buttons */}
+        <div className="hidden sm:flex items-center gap-3">
           <button
             onClick={() => navigate('/login')}
-            className="bg-transparent border border-green-500 text-green-500 px-4 py-1.5 rounded hover:bg-green-500 hover:text-dark-100 transition"
+            className="bg-transparent border border-green-500 text-green-500 px-3 py-1.5 sm:px-4 rounded hover:bg-green-500 hover:text-dark-100 transition text-sm sm:text-base"
           >
             Login
           </button>
           <button
             onClick={handleGetStarted}
-            className="bg-green-500 hover:bg-green-600 text-dark-100 font-bold px-4 py-1.5 rounded transition"
+            className="bg-green-500 hover:bg-green-600 text-dark-100 font-bold px-3 py-1.5 sm:px-4 rounded transition text-sm sm:text-base"
           >
             Sign Up
           </button>
         </div>
+
+        {/* Mobile hamburger */}
+        <button
+          className="md:hidden text-gray-400 hover:text-white transition"
+          onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
+          aria-label="Toggle menu"
+        >
+          {mobileMenuOpen ? <X className="w-6 h-6" /> : <Menu className="w-6 h-6" />}
+        </button>
       </nav>
 
-      {/* Hero Section */}
+      {/* Mobile menu */}
+      {mobileMenuOpen && (
+        <div className="md:hidden bg-dark-200 border-b border-dark-300 px-4 py-4 flex flex-col gap-3 animate-slide-down z-10">
+          <a href="#features" className="text-gray-400 hover:text-white transition" onClick={closeMobileMenu}>Features</a>
+          <a href="#why-us" className="text-gray-400 hover:text-white transition" onClick={closeMobileMenu}>Why Us</a>
+          <a href="#contact" className="text-gray-400 hover:text-white transition" onClick={closeMobileMenu}>Contact</a>
+          <div className="flex flex-col gap-2 pt-2 border-t border-dark-300">
+            <button
+              onClick={() => { navigate('/login'); closeMobileMenu(); }}
+              className="bg-transparent border border-green-500 text-green-500 px-4 py-2 rounded hover:bg-green-500 hover:text-dark-100 transition w-full text-center"
+            >
+              Login
+            </button>
+            <button
+              onClick={() => { navigate('/register'); closeMobileMenu(); }}
+              className="bg-green-500 hover:bg-green-600 text-dark-100 font-bold px-4 py-2 rounded transition w-full text-center"
+            >
+              Sign Up
+            </button>
+          </div>
+        </div>
+      )}
+
+      {/* Hero Section – responsive adjustments */}
       <section className="bg-dark-100 relative flex flex-col overflow-hidden min-h-[calc(100vh-80px)]">
         <div className="absolute top-1/3 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[400px] bg-primary/[0.03] rounded-full blur-[100px] pointer-events-none"></div>
-        <div className="flex-1 flex items-center max-w-7xl mx-auto w-full relative z-10 px-8 py-8 lg:py-20">
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-10 lg:gap-20 items-center w-full">
+        <div className="flex-1 flex items-center max-w-7xl mx-auto w-full relative z-10 px-4 sm:px-8 py-8 lg:py-20">
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 lg:gap-20 items-center w-full">
             {/* Left Column */}
-            <div className="flex flex-col gap-5 lg:gap-10 text-center lg:text-left items-center lg:items-start">
+            <div className="flex flex-col gap-4 lg:gap-10 text-center lg:text-left items-center lg:items-start">
               <button
                 onClick={handleClaim}
-                className="group inline-flex items-center gap-2.5 pl-3 pr-1.5 py-1.5 rounded-full bg-primary/15 border border-primary/40 hover:bg-primary/20 hover:border-primary/60 shadow-[0_0_20px_rgba(0,255,136,0.15)] hover:shadow-[0_0_28px_rgba(0,255,136,0.25)] transition-all animate-slide-up self-center lg:self-start"
+                className="group inline-flex items-center gap-2.5 pl-3 pr-1.5 py-1.5 rounded-full bg-primary/15 border border-primary/40 hover:bg-primary/20 hover:border-primary/60 shadow-[0_0_20px_rgba(0,255,136,0.15)] hover:shadow-[0_0_28px_rgba(0,255,136,0.25)] transition-all animate-slide-up self-center lg:self-start text-xs sm:text-sm"
               >
                 <span className="w-1.5 h-1.5 rounded-full bg-green-400 animate-pulse"></span>
                 <span className="text-xs font-semibold text-green-400">Free for 1 month</span>
                 <span className="hidden sm:inline text-[10px] font-mono uppercase tracking-wider opacity-60">with TRADING ECONOMICS</span>
-                <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full bg-green-500 text-dark-100 text-[10px] font-bold font-mono uppercase tracking-wider group-hover:translate-x-0.5 transition-transform">
+                <span className="inline-flex items-center gap-1 px-2 py-1 rounded-full bg-green-500 text-dark-100 text-[10px] font-bold font-mono uppercase tracking-wider group-hover:translate-x-0.5 transition-transform">
                   Claim<span aria-hidden="true">→</span>
                 </span>
               </button>
-              <div className="flex flex-col gap-2 lg:gap-3 animate-slide-up stagger-1">
-                <h1 className="font-extrabold text-3xl lg:text-6xl tracking-tight">
+              <div className="flex flex-col gap-2 animate-slide-up stagger-1">
+                <h1 className="font-extrabold text-3xl sm:text-4xl lg:text-6xl tracking-tight">
                   Technicals give you levels. <br />
                   <span className="text-green-400 drop-shadow-[0_0_8px_rgba(0,255,136,0.3)]">Fundamentals give you the direction.</span>
-                  <span className="block mt-2 lg:mt-3 font-normal leading-normal text-[10px] font-mono uppercase tracking-[0.2em] text-green-400/80">
+                  <span className="block mt-2 text-[10px] font-mono uppercase tracking-[0.2em] text-green-400/80">
                     Real-time economic data · auto-clasification
                   </span>
                 </h1>
               </div>
-              <p className="text-base lg:text-lg opacity-50 leading-relaxed animate-slide-up stagger-2 max-w-xl">
+              <p className="text-sm sm:text-base lg:text-lg opacity-50 leading-relaxed animate-slide-up stagger-2 max-w-xl">
                 Stop guessing. Start trading with a data‑driven edge that combines institutional positioning, macro surprises, and seasonal patterns into one clear direction.
               </p>
-              <div className="flex flex-col items-center lg:items-start gap-3 animate-slide-up stagger-3">
-                <div className="flex flex-col sm:flex-row items-center gap-3">
+              <div className="flex flex-col items-center lg:items-start gap-3 animate-slide-up stagger-3 w-full">
+                <div className="flex flex-col sm:flex-row items-center gap-3 w-full sm:w-auto">
                   <button
                     onClick={handleGetStarted}
-                    className="bg-green-500 hover:bg-green-600 text-dark-100 font-bold px-8 py-3 rounded-lg transition shadow-[0_0_8px_rgba(0,255,136,0.2)] hover:-translate-y-px hover:shadow-[0_4px_16px_rgba(0,255,136,0.2)]"
+                    className="bg-green-500 hover:bg-green-600 text-dark-100 font-bold px-6 sm:px-8 py-3 rounded-lg transition shadow-[0_0_8px_rgba(0,255,136,0.2)] hover:-translate-y-px hover:shadow-[0_4px_16px_rgba(0,255,136,0.2)] w-full sm:w-auto text-center"
                   >
                     Get started
                   </button>
-                  <a href="#features" className="border border-white/15 text-white/70 hover:border-green-400/40 hover:bg-green-400/5 hover:text-green-400 transition px-6 py-3 rounded-lg">
+                  <a href="#features" className="border border-white/15 text-white/70 hover:border-green-400/40 hover:bg-green-400/5 hover:text-green-400 transition px-6 py-3 rounded-lg w-full sm:w-auto text-center">
                     See the features
                   </a>
                 </div>
@@ -102,10 +144,10 @@ const Landing = () => {
             <div className="w-full animate-slide-up stagger-4">
               <div className="relative">
                 <div className="absolute -inset-px rounded-lg bg-gradient-to-b from-green-400/10 to-transparent pointer-events-none"></div>
-                <div className="bg-dark-200/30 backdrop-blur-sm rounded-lg border border-white/[0.04] p-5 lg:p-6">
+                <div className="bg-dark-200/30 backdrop-blur-sm rounded-lg border border-white/[0.04] p-3 sm:p-5 lg:p-6">
                   <div className="flex items-center gap-2 mb-3">
                     <div className="w-1.5 h-1.5 rounded-full bg-green-400 animate-pulse"></div>
-                    <span className="text-[10px] font-mono uppercase tracking-widest opacity-30">seconds after official release · typical timings</span>
+                    <span className="text-[8px] sm:text-[10px] font-mono uppercase tracking-widest opacity-30">seconds after official release · typical timings</span>
                   </div>
                   <svg viewBox="0 0 580 220" className="w-full h-auto" role="img" aria-label="Speed comparison chart showing MacroPulse delivering data faster than competitors" style={{ fontFamily: 'monospace' }}>
                     {/* Grid lines and labels */}
@@ -161,8 +203,8 @@ const Landing = () => {
 
         {/* Ticker */}
         <div className="relative bg-dark-200/40 border-y border-white/[0.08] animate-slide-up stagger-5">
-          <div className="flex items-stretch h-12 max-w-7xl mx-auto">
-            <div className="flex items-center gap-2.5 px-4 sm:px-5 border-r border-white/[0.08] flex-shrink-0">
+          <div className="flex items-stretch h-10 sm:h-12 max-w-7xl mx-auto">
+            <div className="flex items-center gap-2 px-3 sm:px-5 border-r border-white/[0.08] flex-shrink-0">
               <span className="relative flex w-1.5 h-1.5">
                 <span className="absolute inset-0 rounded-full bg-green-400/60 animate-pulse"></span>
                 <span className="relative w-1.5 h-1.5 rounded-full bg-green-400 shadow-[0_0_6px_rgba(0,255,136,0.8)]"></span>
@@ -170,49 +212,49 @@ const Landing = () => {
               <span className="hidden sm:inline text-[10px] font-mono uppercase tracking-[0.22em] opacity-40">Covering</span>
             </div>
             <div className="relative flex-1 overflow-hidden group" style={{ maskImage: 'linear-gradient(90deg, transparent 0, #000 40px, #000 calc(100% - 40px), transparent 100%)', WebkitMaskImage: 'linear-gradient(90deg, transparent 0, #000 40px, #000 calc(100% - 40px), transparent 100%)' }}>
-              <div className="flex items-center justify-center h-full gap-5 sm:gap-8 whitespace-nowrap animate-[ticker_20s_linear_infinite] md:animate-[ticker_40s_linear_infinite] group-hover:[animation-play-state:paused] will-change-transform">
-                <span className="flex items-center gap-5 sm:gap-8 text-xs font-mono tracking-wider opacity-40 hover:opacity-80 transition-opacity">
+              <div className="flex items-center justify-center h-full gap-3 sm:gap-5 whitespace-nowrap animate-[ticker_20s_linear_infinite] md:animate-[ticker_40s_linear_infinite] group-hover:[animation-play-state:paused] will-change-transform text-[10px] sm:text-xs">
+                <span className="flex items-center gap-2 sm:gap-5 opacity-40 hover:opacity-80 transition-opacity">
                   <span className="w-px h-2.5 bg-green-400/50 shadow-[0_0_3px_rgba(0,255,136,0.4)]"></span>GDP
                 </span>
-                <span className="flex items-center gap-5 sm:gap-8 text-xs font-mono tracking-wider opacity-40 hover:opacity-80 transition-opacity">
+                <span className="flex items-center gap-2 sm:gap-5 opacity-40 hover:opacity-80 transition-opacity">
                   <span className="w-px h-2.5 bg-green-400/50 shadow-[0_0_3px_rgba(0,255,136,0.4)]"></span>NFP
                 </span>
-                <span className="flex items-center gap-5 sm:gap-8 text-xs font-mono tracking-wider opacity-40 hover:opacity-80 transition-opacity">
+                <span className="flex items-center gap-2 sm:gap-5 opacity-40 hover:opacity-80 transition-opacity">
                   <span className="w-px h-2.5 bg-green-400/50 shadow-[0_0_3px_rgba(0,255,136,0.4)]"></span>RETAIL SALES
                 </span>
-                <span className="flex items-center gap-5 sm:gap-8 text-xs font-mono tracking-wider opacity-40 hover:opacity-80 transition-opacity">
+                <span className="flex items-center gap-2 sm:gap-5 opacity-40 hover:opacity-80 transition-opacity">
                   <span className="w-px h-2.5 bg-green-400/50 shadow-[0_0_3px_rgba(0,255,136,0.4)]"></span>CONSUMER CONFIDENCE
                 </span>
-                <span className="flex items-center gap-5 sm:gap-8 text-xs font-mono tracking-wider opacity-40 hover:opacity-80 transition-opacity">
+                <span className="flex items-center gap-2 sm:gap-5 opacity-40 hover:opacity-80 transition-opacity">
                   <span className="w-px h-2.5 bg-green-400/50 shadow-[0_0_3px_rgba(0,255,136,0.4)]"></span>CPI YOY
                 </span>
-                <span className="flex items-center gap-5 sm:gap-8 text-xs font-mono tracking-wider opacity-40 hover:opacity-80 transition-opacity">
+                <span className="flex items-center gap-2 sm:gap-5 opacity-40 hover:opacity-80 transition-opacity">
                   <span className="w-px h-2.5 bg-green-400/50 shadow-[0_0_3px_rgba(0,255,136,0.4)]"></span>PPI YOY
                 </span>
-                <span className="flex items-center gap-5 sm:gap-8 text-xs font-mono tracking-wider opacity-40 hover:opacity-80 transition-opacity">
+                <span className="flex items-center gap-2 sm:gap-5 opacity-40 hover:opacity-80 transition-opacity">
                   <span className="w-px h-2.5 bg-green-400/50 shadow-[0_0_3px_rgba(0,255,136,0.4)]"></span>Jobless Claims
                 </span>
-                <span className="flex items-center gap-5 sm:gap-8 text-xs font-mono tracking-wider opacity-40 hover:opacity-80 transition-opacity">
+                <span className="flex items-center gap-2 sm:gap-5 opacity-40 hover:opacity-80 transition-opacity">
                   <span className="w-px h-2.5 bg-green-400/50 shadow-[0_0_3px_rgba(0,255,136,0.4)]"></span>ADP
                 </span>
-                <span className="flex items-center gap-5 sm:gap-8 text-xs font-mono tracking-wider opacity-40 hover:opacity-80 transition-opacity">
+                <span className="flex items-center gap-2 sm:gap-5 opacity-40 hover:opacity-80 transition-opacity">
                   <span className="w-px h-2.5 bg-green-400/50 shadow-[0_0_3px_rgba(0,255,136,0.4)]"></span>UNEMPLOYMENT RATE
                 </span>
-                <span className="flex items-center gap-5 sm:gap-8 text-xs font-mono tracking-wider opacity-40 hover:opacity-80 transition-opacity">
+                <span className="flex items-center gap-2 sm:gap-5 opacity-40 hover:opacity-80 transition-opacity">
                   <span className="w-px h-2.5 bg-green-400/50 shadow-[0_0_3px_rgba(0,255,136,0.4)]"></span>JOLTS
                 </span>
-                <span className="flex items-center gap-5 sm:gap-8 text-xs font-mono tracking-wider opacity-40 hover:opacity-80 transition-opacity">
-                  <span className="w-px h-2.5 bg-green-400/50 shadow-[0_0_3px_rgba(0,255,136,0.4)]"></span>Manufaturing pmis
+                <span className="flex items-center gap-2 sm:gap-5 opacity-40 hover:opacity-80 transition-opacity">
+                  <span className="w-px h-2.5 bg-green-400/50 shadow-[0_0_3px_rgba(0,255,136,0.4)]"></span>Manufaturing PMIs
                 </span>
-                <span className="flex items-center gap-5 sm:gap-8 text-xs font-mono tracking-wider opacity-40 hover:opacity-80 transition-opacity">
-                  <span className="w-px h-2.5 bg-green-400/50 shadow-[0_0_3px_rgba(0,255,136,0.4)]"></span>Service pmis
+                <span className="flex items-center gap-2 sm:gap-5 opacity-40 hover:opacity-80 transition-opacity">
+                  <span className="w-px h-2.5 bg-green-400/50 shadow-[0_0_3px_rgba(0,255,136,0.4)]"></span>Service PMIs
                 </span>
-                <span className="flex items-center gap-5 sm:gap-8 text-xs font-mono tracking-wider opacity-40 hover:opacity-80 transition-opacity">
+                <span className="flex items-center gap-2 sm:gap-5 opacity-40 hover:opacity-80 transition-opacity">
                   <span className="w-px h-2.5 bg-green-400/50 shadow-[0_0_3px_rgba(0,255,136,0.4)]"></span>Household spending
                 </span>
               </div>
             </div>
-            <a className="group/more flex items-center gap-2 px-4 sm:px-5 border-l border-white/[0.08] flex-shrink-0 hover:bg-primary/5 transition-colors" aria-label="Scroll to features" href="#features">
+            <a className="group/more flex items-center gap-2 px-3 sm:px-5 border-l border-white/[0.08] flex-shrink-0 hover:bg-primary/5 transition-colors" href="#features">
               <span className="hidden sm:inline text-[10px] font-mono uppercase tracking-[0.22em] opacity-40 group-hover/more:opacity-90 group-hover/more:text-green-400 transition-all">More</span>
               <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 12 12" className="w-3 h-3 opacity-40 group-hover/more:opacity-90 group-hover/more:text-green-400 group-hover/more:translate-y-[1px] transition-all duration-200" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
                 <path d="M3 4.5l3 3 3-3"></path>
@@ -224,14 +266,14 @@ const Landing = () => {
 
       {/* The Problem Section */}
       <section className="bg-dark-200 relative overflow-hidden">
-        <div className="max-w-7xl mx-auto px-8 py-20 md:py-32 relative z-10">
+        <div className="max-w-7xl mx-auto px-4 sm:px-8 py-16 md:py-24 lg:py-32 relative z-10">
           <div className="flex items-center justify-center gap-2 mb-6">
             <div className="h-px w-8 bg-red-400/30"></div>
             <span className="text-xs font-mono uppercase tracking-[0.2em] text-red-400/60">the problem</span>
             <div className="h-px w-8 bg-red-400/30"></div>
           </div>
-          <h2 className="font-extrabold text-4xl md:text-5xl tracking-tight text-center mb-4">You're trading only techinicals</h2>
-          <p className="text-lg opacity-60 text-center max-w-xl mx-auto mb-16 md:mb-24">Fundamentals tell the real direction,technicals tell the entry</p>
+          <h2 className="font-extrabold text-3xl sm:text-4xl md:text-5xl tracking-tight text-center mb-4">You're trading only technicals</h2>
+          <p className="text-sm sm:text-base md:text-lg opacity-60 text-center max-w-xl mx-auto mb-12 md:mb-16">Fundamentals tell the real direction, technicals tell the entry</p>
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6 md:gap-8">
             <div className="group relative bg-white/[0.03] border border-white/[0.06] rounded-xl p-5 md:p-8 hover:border-red-400/20 hover:bg-white/[0.05] hover:-translate-y-0.5 transition-all duration-150">
               <span className="text-red-400/60 mb-4 block">
@@ -266,14 +308,14 @@ const Landing = () => {
 
       {/* How It Works Section */}
       <section className="bg-dark-100 relative overflow-hidden">
-        <div className="max-w-7xl mx-auto px-8 py-20 md:py-32 relative z-10">
+        <div className="max-w-7xl mx-auto px-4 sm:px-8 py-16 md:py-24 lg:py-32 relative z-10">
           <div className="flex items-center justify-center gap-2 mb-6">
             <div className="h-px w-8 bg-green-400/50"></div>
             <span className="text-xs font-mono uppercase tracking-[0.2em] text-green-400/80">how it works</span>
             <div className="h-px w-8 bg-green-400/50"></div>
           </div>
-          <h2 className="font-extrabold text-4xl md:text-5xl tracking-tight text-center mb-4">Three steps from source to trade</h2>
-          <p className="text-lg opacity-40 text-center max-w-xl mx-auto mb-16 md:mb-24">Select your asset, We handle the rest.</p>
+          <h2 className="font-extrabold text-3xl sm:text-4xl md:text-5xl tracking-tight text-center mb-4">Three steps from source to trade</h2>
+          <p className="text-sm sm:text-base md:text-lg opacity-40 text-center max-w-xl mx-auto mb-12 md:mb-16">Select your asset, We handle the rest.</p>
           <div className="flex flex-col md:flex-row justify-center items-start gap-0">
             <div className="flex-1 flex flex-col items-center text-center relative group">
               <div className="hidden md:block absolute top-7 left-[calc(50%+2rem)] right-[calc(-50%+2rem)] h-1 bg-gradient-to-r from-green-400/40 via-green-400/50 to-green-400/30 rounded-full shadow-[0_0_6px_rgba(0,255,136,0.25)]"></div>
@@ -307,13 +349,13 @@ const Landing = () => {
 
       {/* Comparison Section */}
       <section className="bg-dark-200/30 relative overflow-hidden">
-        <div className="max-w-5xl mx-auto px-8 py-20 md:py-32 relative z-10">
+        <div className="max-w-5xl mx-auto px-4 sm:px-8 py-16 md:py-24 lg:py-32 relative z-10">
           <div className="flex items-center justify-center gap-2 mb-6">
             <div className="h-px w-8 bg-green-400/30"></div>
             <span className="text-xs font-mono uppercase tracking-[0.2em] text-green-400/50">comparison</span>
             <div className="h-px w-8 bg-green-400/30"></div>
           </div>
-          <h2 className="text-center font-extrabold text-3xl md:text-5xl tracking-tight mb-14 md:mb-20">Trading releases with MacroPulse</h2>
+          <h2 className="text-center font-extrabold text-3xl sm:text-4xl md:text-5xl tracking-tight mb-12 md:mb-16">Trading releases with MacroPulse</h2>
           <div className="flex flex-col md:flex-row justify-center items-stretch gap-6 md:gap-0">
             <div className="flex-1 border-2 border-red-400/20 bg-dark-200/80 rounded-xl md:rounded-r-none p-5 md:p-8 lg:p-10 relative overflow-hidden shadow-[0_0_40px_rgba(239,68,68,0.1)]">
               <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-red-400/50 via-red-400/30 to-transparent"></div>
@@ -410,14 +452,14 @@ const Landing = () => {
       </section>
 
       {/* Features Grid */}
-      <section className="py-20 md:py-32 max-w-7xl mx-auto bg-dark-100 relative" id="features">
-        <div className="px-8">
+      <section className="py-16 md:py-24 lg:py-32 max-w-7xl mx-auto bg-dark-100 relative" id="features">
+        <div className="px-4 sm:px-8">
           <div className="flex items-center gap-2 mb-6">
             <div className="h-px w-8 bg-green-400/50"></div>
             <span className="text-xs font-mono uppercase tracking-[0.2em] text-green-400/80">features</span>
           </div>
-          <h2 className="font-extrabold text-3xl md:text-4xl lg:text-6xl tracking-tight mb-4">Built for speed</h2>
-          <p className="text-lg opacity-40 mb-14 md:mb-20 max-w-xl">Every component engineered to eliminate latency between data releases and trade execution.</p>
+          <h2 className="font-extrabold text-3xl sm:text-4xl lg:text-6xl tracking-tight mb-4">Built for speed</h2>
+          <p className="text-base sm:text-lg opacity-40 mb-12 md:mb-16 max-w-xl">Every component engineered to eliminate latency between data releases and trade execution.</p>
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 md:gap-5">
             <div className="group relative flex flex-col gap-3 p-6 rounded-xl border border-white/[0.04] bg-dark-200/30 hover:border-green-400/30 hover:-translate-y-0.5 hover:shadow-[0_0_16px_rgba(0,255,136,0.1)] transition-all duration-150">
               <span className="text-green-400/80 group-hover:text-green-400 group-hover:drop-shadow-[0_0_6px_rgba(0,255,136,0.35)] transition-all duration-150 relative">
@@ -479,7 +521,7 @@ const Landing = () => {
 
       {/* Metrics Strip */}
       <section className="bg-dark-200 border-y border-white/[0.04] relative">
-        <div className="max-w-5xl mx-auto px-8 py-20 md:py-24 relative">
+        <div className="max-w-5xl mx-auto px-4 sm:px-8 py-16 md:py-20 lg:py-24 relative">
           <div className="grid grid-cols-1 md:grid-cols-3 gap-8 text-center">
             <div className="relative">
               <span className="text-[10px] font-mono uppercase tracking-[0.2em] text-green-400/40 mb-2 block">execution</span>
@@ -505,14 +547,14 @@ const Landing = () => {
       {/* Final CTA */}
       <section className="bg-dark-200 relative overflow-hidden">
         <div className="texture-grain absolute inset-0 pointer-events-none"></div>
-        <div className="py-16 md:py-24 px-8 max-w-3xl mx-auto text-center relative z-10">
+        <div className="py-16 md:py-20 lg:py-24 px-4 sm:px-8 max-w-3xl mx-auto text-center relative z-10">
           <div className="flex items-center justify-center gap-2 mb-6">
             <div className="h-px w-8 bg-green-400/50"></div>
             <span className="text-xs font-mono uppercase tracking-[0.2em] text-green-400/80">get started</span>
             <div className="h-px w-8 bg-green-400/50"></div>
           </div>
-          <h2 className="font-bold text-3xl md:text-5xl tracking-tight mb-6">Be first to the next release</h2>
-          <p className="text-lg opacity-50 mb-10">Get the data feed and the auto-clasification client in one subscription. 30-day money-back guarantee, cancel anytime.</p>
+          <h2 className="font-bold text-3xl sm:text-4xl md:text-5xl tracking-tight mb-6">Be first to the next release</h2>
+          <p className="text-base sm:text-lg opacity-50 mb-8 md:mb-10">Get the data feed and the auto-clasification client in one subscription. 30-day money-back guarantee, cancel anytime.</p>
           <button
             onClick={handleGetStarted}
             className="bg-green-500 hover:bg-green-600 text-dark-100 font-bold px-8 py-3 rounded-lg transition shadow-[0_0_8px_rgba(0,255,136,0.2)] hover:shadow-[0_4px_16px_rgba(0,255,136,0.2)] w-full sm:w-auto"
