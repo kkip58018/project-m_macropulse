@@ -1,9 +1,8 @@
 import { useState } from 'react';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import api from '../../api/client';
-import { RefreshCw } from 'lucide-react';
+import { RefreshCw } from 'lucide-react'
 
-// Indicator definitions (mirroring backend constants)
 const CORE_INDICATORS = [
   'GDP',
   'Retail Sales',
@@ -73,7 +72,7 @@ const DataUpdates = () => {
     cpi_yoy: 0,
   });
 
-  // Mutations
+  // ---------- Mutations ----------
   const updateIndicator = useMutation({
     mutationFn: (data) => api.put(`/admin/indicators/${data.currency}/${data.indicator}/`, data),
     onSuccess: () => {
@@ -127,14 +126,6 @@ const DataUpdates = () => {
     onError: (error) => alert(`Error: ${error.response?.data?.error || error.message}`),
   });
 
-  const clearCache = useMutation({
-    mutationFn: () => api.post('/admin/clear-cache/'),
-    onSuccess: () => {
-      alert('Cache cleared successfully');
-    },
-    onError: (error) => alert(`Error: ${error.response?.data?.error || error.message}`),
-  });
-
   const refreshSeasonality = useMutation({
     mutationFn: () => api.post('/admin/refresh-seasonality/'),
     onSuccess: (response) => {
@@ -143,6 +134,27 @@ const DataUpdates = () => {
     onError: (error) => alert(`Error: ${error.response?.data?.error || error.message}`),
   });
 
+  const refreshPutCall = useMutation({
+    mutationFn: () => api.post('/admin/refresh-put-call/'),
+    onSuccess: (response) => {
+      const results = response.data.results || {};
+      const summary = Object.entries(results)
+        .map(([ticker, status]) => `${ticker}: ${status}`)
+        .join('\n');
+      alert(`Put-call refresh completed:\n${summary}`);
+    },
+    onError: (error) => alert(`Error: ${error.response?.data?.error || error.message}`),
+  });
+
+  const clearCache = useMutation({
+    mutationFn: () => api.post('/admin/clear-cache/'),
+    onSuccess: () => {
+      alert('Cache cleared successfully');
+    },
+    onError: (error) => alert(`Error: ${error.response?.data?.error || error.message}`),
+  });
+
+  // ---------- Form handlers ----------
   const handleIndicatorSubmit = (e) => {
     e.preventDefault();
     updateIndicator.mutate(indicatorData);
@@ -163,53 +175,76 @@ const DataUpdates = () => {
     updateStrength.mutate(strengthData);
   };
 
+  // ---------- Compute available indicators for dropdown ----------
   const availableIndicators = getIndicatorsForCurrency(indicatorData.currency);
 
   return (
     <div className="text-white">
-      <h2 className="text-2xl font-bold mb-2 text-white flex items-center gap-2"><RefreshCw className="w-6 h-6" /> Data Updates</h2>
+      <h2 className="text-2xl font-bold mb-4 flex items-center gap-2"><RefreshCw className="w-6 h-6" /> Data Updates</h2>
 
+      {/* Tabs */}
       <div className="flex gap-2 mb-4 flex-wrap">
         <button
           onClick={() => setActiveTab('indicators')}
-          className={`px-4 py-2 rounded ${activeTab === 'indicators' ? 'bg-dark-300 text-white' : 'bg-dark-200 text-gray-400'}`}
+          className={`px-4 py-2 rounded ${
+            activeTab === 'indicators' ? 'bg-dark-300 text-white' : 'bg-dark-200 text-gray-400'
+          }`}
         >
           Indicators
         </button>
         <button
           onClick={() => setActiveTab('cot')}
-          className={`px-4 py-2 rounded ${activeTab === 'cot' ? 'bg-dark-300 text-white' : 'bg-dark-200 text-gray-400'}`}
+          className={`px-4 py-2 rounded ${
+            activeTab === 'cot' ? 'bg-dark-300 text-white' : 'bg-dark-200 text-gray-400'
+          }`}
         >
           COT Data
         </button>
         <button
           onClick={() => setActiveTab('bond')}
-          className={`px-4 py-2 rounded ${activeTab === 'bond' ? 'bg-dark-300 text-white' : 'bg-dark-200 text-gray-400'}`}
+          className={`px-4 py-2 rounded ${
+            activeTab === 'bond' ? 'bg-dark-300 text-white' : 'bg-dark-200 text-gray-400'
+          }`}
         >
           Bond Yield
         </button>
         <button
           onClick={() => setActiveTab('strength')}
-          className={`px-4 py-2 rounded ${activeTab === 'strength' ? 'bg-dark-300 text-white' : 'bg-dark-200 text-gray-400'}`}
+          className={`px-4 py-2 rounded ${
+            activeTab === 'strength' ? 'bg-dark-300 text-white' : 'bg-dark-200 text-gray-400'
+          }`}
         >
           Economic Strength
         </button>
         <button
           onClick={() => setActiveTab('seasonality')}
-          className={`px-4 py-2 rounded ${activeTab === 'seasonality' ? 'bg-dark-300 text-white' : 'bg-dark-200 text-gray-400'}`}
+          className={`px-4 py-2 rounded ${
+            activeTab === 'seasonality' ? 'bg-dark-300 text-white' : 'bg-dark-200 text-gray-400'
+          }`}
         >
           Seasonality
         </button>
         <button
+          onClick={() => setActiveTab('putcall')}
+          className={`px-4 py-2 rounded ${
+            activeTab === 'putcall' ? 'bg-dark-300 text-white' : 'bg-dark-200 text-gray-400'
+          }`}
+        >
+          Put-Call Ratio
+        </button>
+        <button
           onClick={() => setActiveTab('cache')}
-          className={`px-4 py-2 rounded ${activeTab === 'cache' ? 'bg-dark-300 text-white' : 'bg-dark-200 text-gray-400'}`}
+          className={`px-4 py-2 rounded ${
+            activeTab === 'cache' ? 'bg-dark-300 text-white' : 'bg-dark-200 text-gray-400'
+          }`}
         >
           Cache
         </button>
       </div>
 
+      {/* Content */}
       <div className="bg-dark-200 p-6 rounded-lg border border-dark-300">
-        {/* Indicators Tab */}
+        {/* --- Indicators Tab --- */}
         {activeTab === 'indicators' && (
           <div>
             <div className="flex justify-between items-center mb-4">
@@ -316,7 +351,7 @@ const DataUpdates = () => {
           </div>
         )}
 
-        {/* COT Tab */}
+        {/* --- COT Tab --- */}
         {activeTab === 'cot' && (
           <form onSubmit={handleCOTSubmit}>
             <h3 className="text-lg font-semibold mb-4">Update COT Record</h3>
@@ -383,7 +418,7 @@ const DataUpdates = () => {
           </form>
         )}
 
-        {/* Bond Yield Tab */}
+        {/* --- Bond Yield Tab --- */}
         {activeTab === 'bond' && (
           <form onSubmit={handleBondSubmit}>
             <h3 className="text-lg font-semibold mb-4">Update 2Y Yield Score</h3>
@@ -423,7 +458,7 @@ const DataUpdates = () => {
           </form>
         )}
 
-        {/* Economic Strength Tab */}
+        {/* --- Economic Strength Tab --- */}
         {activeTab === 'strength' && (
           <form onSubmit={handleStrengthSubmit}>
             <h3 className="text-lg font-semibold mb-4">Update Economic Strength</h3>
@@ -491,7 +526,7 @@ const DataUpdates = () => {
           </form>
         )}
 
-        {/* Seasonality Tab */}
+        {/* --- Seasonality Tab --- */}
         {activeTab === 'seasonality' && (
           <div>
             <h3 className="text-lg font-semibold mb-4">Refresh Seasonality Data</h3>
@@ -508,7 +543,24 @@ const DataUpdates = () => {
           </div>
         )}
 
-        {/* Cache Tab */}
+        {/* --- Put-Call Ratio Tab --- */}
+        {activeTab === 'putcall' && (
+          <div>
+            <h3 className="text-lg font-semibold mb-4">Refresh Put-Call Ratio</h3>
+            <p className="text-gray-400 mb-4">
+              Fetch fresh put-call ratios from Barchart for all assets (IBIT, GLD, SLV, QQQ, SPY, UUP, USO).
+            </p>
+            <button
+              onClick={() => refreshPutCall.mutate()}
+              className="bg-green-600 hover:bg-green-700 text-white font-bold py-2 px-4 rounded transition"
+              disabled={refreshPutCall.isPending}
+            >
+              {refreshPutCall.isPending ? 'Refreshing...' : 'Refresh All'}
+            </button>
+          </div>
+        )}
+
+        {/* --- Cache Tab --- */}
         {activeTab === 'cache' && (
           <div>
             <h3 className="text-lg font-semibold mb-4">Cache Management</h3>
