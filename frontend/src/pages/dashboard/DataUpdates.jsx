@@ -1,7 +1,6 @@
-import { useState } from 'react';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
+import { useState } from 'react';
 import api from '../../api/client';
-import { RefreshCw } from 'lucide-react'
 
 const CORE_INDICATORS = [
   'GDP',
@@ -180,7 +179,7 @@ const DataUpdates = () => {
 
   return (
     <div className="text-white">
-      <h2 className="text-2xl font-bold mb-4 flex items-center gap-2"><RefreshCw className="w-6 h-6" /> Data Updates</h2>
+      <h2 className="text-2xl font-bold mb-4">✏️ Data Updates</h2>
 
       {/* Tabs */}
       <div className="flex gap-2 mb-4 flex-wrap">
@@ -239,6 +238,14 @@ const DataUpdates = () => {
           }`}
         >
           Cache
+        </button>
+        <button
+          onClick={() => setActiveTab('refresh')}
+          className={`px-4 py-2 rounded ${
+            activeTab === 'refresh' ? 'bg-dark-300 text-white' : 'bg-dark-200 text-gray-400'
+          }`}
+        >
+          Refresh Frontend
         </button>
       </div>
 
@@ -574,6 +581,34 @@ const DataUpdates = () => {
             >
               {clearCache.isPending ? 'Clearing...' : 'Clear Cache'}
             </button>
+          </div>
+        )}
+
+        {/* --- Refresh Frontend Tab --- */}
+        {activeTab === 'refresh' && (
+          <div>
+            <h3 className="text-lg font-semibold mb-4">Refresh Frontend Data</h3>
+            <p className="text-gray-400 mb-4">
+              Invalidate and refetch all data from the backend, or perform a hard refresh of the page.
+            </p>
+            <div className="flex gap-4">
+              <button
+                onClick={() => {
+                  queryClient.invalidateQueries();
+                  queryClient.refetchQueries();
+                  alert('All queries have been invalidated and refetched.');
+                }}
+                className="bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded transition"
+              >
+                Refresh Data
+              </button>
+              <button
+                onClick={() => window.location.reload()}
+                className="bg-yellow-600 hover:bg-yellow-700 text-white font-bold py-2 px-4 rounded transition"
+              >
+                Hard Refresh (Reload Page)
+              </button>
+            </div>
           </div>
         )}
       </div>
